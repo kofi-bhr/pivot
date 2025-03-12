@@ -1,103 +1,312 @@
-import Image from "next/image";
+import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
+import Layout from '@/components/layout/Layout';
 
-export default function Home() {
+interface Author {
+  id: number;
+  first_name: string;
+  last_name: string;
+  image_url: string | null;
+  name?: string;
+}
+
+interface Article {
+  id: number;
+  title: string;
+  cover_image_url: string | null;
+  published_at: string | null;
+  content?: string | null;
+  tags: string[];
+  author: Author;
+}
+
+interface ArticleRow {
+  id: number;
+  title: string;
+  cover_image_url: string | null;
+  published_at: string | null;
+  content: string | null;
+  tags: string[] | null;
+  author: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    image_url: string | null;
+  };
+}
+
+async function getFeaturedArticles(): Promise<Article[]> {
+  console.log('Fetching featured articles');
+  const { data, error } = await supabase
+    .from('articles')
+    .select(`
+      id, title, cover_image_url, published_at, content, tags,
+      author:author_id (
+        id, first_name, last_name, image_url
+      )
+    `)
+    .eq('is_visible', true)
+    .not('published_at', 'is', null)
+    .order('published_at', { ascending: false })
+    .limit(5)
+    .returns<ArticleRow[]>();
+
+  if (error) {
+    console.error('Error fetching featured articles:', error);
+    return [];
+  }
+
+  console.log('Found featured articles:', data);
+  return (data || []).map(article => ({
+    id: article.id,
+    title: article.title,
+    cover_image_url: article.cover_image_url,
+    published_at: article.published_at,
+    content: article.content,
+    tags: article.tags || [],
+    author: {
+      id: article.author.id,
+      first_name: article.author.first_name,
+      last_name: article.author.last_name,
+      image_url: article.author.image_url,
+      name: `${article.author.first_name} ${article.author.last_name}`
+    }
+  }));
+}
+
+async function getRecentArticles(): Promise<Article[]> {
+  console.log('Fetching recent articles');
+  const { data, error } = await supabase
+    .from('articles')
+    .select(`
+      id, title, cover_image_url, published_at, content, tags,
+      author:author_id (
+        id, first_name, last_name, image_url
+      )
+    `)
+    .eq('is_visible', true)
+    .not('published_at', 'is', null)
+    .order('published_at', { ascending: false })
+    .limit(10)
+    .returns<ArticleRow[]>();
+
+  if (error) {
+    console.error('Error fetching recent articles:', error);
+    return [];
+  }
+
+  console.log('Found recent articles:', data);
+  return (data || []).map(article => ({
+    id: article.id,
+    title: article.title,
+    cover_image_url: article.cover_image_url,
+    published_at: article.published_at,
+    content: article.content,
+    tags: article.tags || [],
+    author: {
+      id: article.author.id,
+      first_name: article.author.first_name,
+      last_name: article.author.last_name,
+      image_url: article.author.image_url,
+      name: `${article.author.first_name} ${article.author.last_name}`
+    }
+  }));
+}
+
+// Helper function to truncate text
+function truncateText(text: string | null | undefined, maxLength: number = 150, addReadMore: boolean = false): string {
+  if (!text) return '';
+  const truncated = text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  return addReadMore ? truncated + ' READ MORE' : truncated;
+}
+
+// Helper function to get unique authors from articles
+function getUniqueAuthors(articles: Article[]): Author[] {
+  const uniqueAuthors = new Map<number, Author>();
+  
+  articles.forEach(article => {
+    if (!uniqueAuthors.has(article.author.id)) {
+      uniqueAuthors.set(article.author.id, article.author);
+    }
+  });
+  
+  return Array.from(uniqueAuthors.values());
+}
+
+export default async function Home() {
+  const [articles, recentArticles] = await Promise.all([
+    getFeaturedArticles(),
+    getRecentArticles()
+  ]);
+
+  const featuredArticle = articles[0];
+  const secondaryArticles = articles.slice(1, 3);
+  const moreArticles = recentArticles.slice(3, 6);
+
+  // Get unique tags from all articles for topic sections
+  const allTags = [...new Set(recentArticles.flatMap(article => article.tags))];
+  const featuredTags = allTags.slice(0, 3);
+  
+  // Get unique authors for contributors section
+  const contributors = getUniqueAuthors([...articles, ...recentArticles]);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <Layout>
+      <div className="cfr-container py-8">
+        <div className="cfr-main-content">
+          {/* Main Content Column */}
+          <div>
+            {/* Featured Articles Section */}
+            <section>
+              {featuredArticle && (
+                <div className="cfr-featured-article">
+                  <div className="relative mb-6">
+                    {featuredArticle.cover_image_url && (
+                      <img 
+                        src={featuredArticle.cover_image_url} 
+                        alt={featuredArticle.title}
+                        className="cfr-article-image cfr-featured-image w-full object-cover"
+                      />
+                    )}
+                    {featuredArticle.tags && featuredArticle.tags.length > 0 && (
+                      <span className="cfr-topic-label absolute top-3 left-3 z-10">{featuredArticle.tags[0]}</span>
+                    )}
+                  </div>
+                  <div className="mb-8">
+                    <Link href={`/articles/${featuredArticle.id}`}>
+                      <h2 className="cfr-article-title text-2xl mb-3">{featuredArticle.title}</h2>
+                    </Link>
+                    <p className="text-gray-600 mb-3">
+                      {truncateText(featuredArticle.content, 250, true)}
+                    </p>
+                    <div className="cfr-article-meta">
+                      <span>Article by </span>
+                      <Link 
+                        href={`/authors/${featuredArticle.author.id}`}
+                        className="cfr-author-link"
+                      >
+                        {featuredArticle.author.name}
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+              {/* Secondary Articles Grid */}
+              <div className="grid grid-cols-2 gap-8 mb-12">
+                {secondaryArticles.map(article => (
+                  <div key={article.id} className="cfr-article-card">
+                    <div className="relative mb-4">
+                      {article.cover_image_url && (
+                        <img 
+                          src={article.cover_image_url} 
+                          alt={article.title}
+                          className="cfr-article-image cfr-secondary-image w-full object-cover"
+                        />
+                      )}
+                      {article.tags && article.tags.length > 0 && (
+                        <span className="cfr-topic-label absolute top-3 left-3 z-10">{article.tags[0]}</span>
+                      )}
+                    </div>
+                    <Link href={`/articles/${article.id}`}>
+                      <h3 className="cfr-article-title text-xl mb-2">{article.title}</h3>
+                    </Link>
+                    <p className="text-gray-600 text-sm mb-2">
+                      {truncateText(article.content, 150, true)}
+                    </p>
+                    <div className="cfr-article-meta">
+                      <span>Article by </span>
+                      <Link 
+                        href={`/authors/${article.author.id}`}
+                        className="cfr-author-link"
+                      >
+                        {article.author.name}
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Contributors Section */}
+              <div className="mb-12">
+                <h2 className="cfr-section-title mb-6">Contributors</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {contributors.slice(0, 6).map(author => (
+                    <div key={author.id} className="cfr-contributor flex items-center gap-4 pb-4 border-b border-gray-100">
+                      <div className="relative flex-shrink-0" style={{ width: '60px', height: '60px' }}>
+                        {author.image_url ? (
+                          <img 
+                            src={author.image_url} 
+                            alt={author.name || `${author.first_name} ${author.last_name}`}
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
+                            <span className="text-gray-500 text-xl font-medium">
+                              {author.first_name.charAt(0)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <Link href={`/authors/${author.id}`}>
+                          <h3 className="cfr-author-name text-base font-medium mb-1">
+                            {author.name || `${author.first_name} ${author.last_name}`}
+                          </h3>
+                        </Link>
+                        <p className="text-gray-600 text-sm">
+                          Contributor
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* Sidebar */}
+          <div className="cfr-sidebar">
+            {/* Recent Articles */}
+            <div className="mb-8">
+              <h2 className="cfr-section-title mb-4">Recent Articles</h2>
+              <div className="space-y-4">
+                {recentArticles.slice(0, 3).map(article => (
+                  <div key={article.id} className="cfr-sidebar-article pb-4 border-b border-gray-100">
+                    <Link href={`/articles/${article.id}`}>
+                      <h3 className="cfr-article-title text-base mb-1">{article.title}</h3>
+                    </Link>
+                    <p className="text-gray-600 text-sm mb-1">
+                      {truncateText(article.content, 100, true)}
+                    </p>
+                    <div className="cfr-article-meta text-sm">
+                      <span>By </span>
+                      <Link 
+                        href={`/authors/${article.author.id}`}
+                        className="cfr-author-link"
+                      >
+                        {article.author.name}
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Topics */}
+            <div>
+              <h2 className="cfr-section-title mb-4">Topics</h2>
+              <div className="space-y-2">
+                {featuredTags.map(tag => (
+                  <Link key={tag} href={`/topics/${tag}`} className="cfr-topic-card block p-4 border border-gray-100 hover:border-gray-300">
+                    <h3 className="font-medium">{tag}</h3>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </div>
+    </Layout>
   );
 }
