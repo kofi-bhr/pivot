@@ -5,28 +5,23 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
-import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 interface Author {
   id: string;
   first_name: string;
   last_name: string;
-  email: string | null;
-  description: string | null;
   image_url: string | null;
-  tags: string[] | null;
   article_count: number;
+  is_visible: boolean;
 }
 
 interface AuthorResponse {
   id: string;
   first_name: string;
   last_name: string;
-  email: string | null;
-  description: string | null;
   image_url: string | null;
-  tags: string[] | null;
-  article_count: number;
+  articles: { count: number };
 }
 
 export default function AuthorsAdmin() {
@@ -39,45 +34,68 @@ export default function AuthorsAdmin() {
 
   async function fetchAuthors() {
     try {
-      const { data, error } = await supabase
+      // First, get all authors
+      const { data: authorsData, error: authorsError } = await supabase
         .from('authors')
         .select(`
           id,
           first_name,
           last_name,
-          email,
-          description,
           image_url,
-          tags,
-          article_count: articles(count)
-        `)
-        .returns<AuthorResponse[]>();
+          is_visible
+        `);
 
-      if (error) throw error;
-      setAuthors(data || []);
-    } catch (error) {
-      console.error('Error fetching authors:', error);
-      alert('Error fetching authors');
+      if (authorsError) throw authorsError;
+      
+      // Then, for each author, count their articles
+      const authorsWithCounts = await Promise.all(
+        (authorsData || []).map(async (author) => {
+          const { count, error: countError } = await supabase
+            .from('articles')
+            .select('*', { count: 'exact', head: true })
+            .eq('author_id', author.id);
+            
+          if (countError) {
+            console.error('Error counting articles:', countError);
+            return {
+              ...author,
+              article_count: 0
+            };
+          }
+          
+          return {
+            ...author,
+            article_count: count || 0
+          };
+        })
+      );
+      
+      setAuthors(authorsWithCounts);
+    } catch (error: any) {
+      console.error('Error fetching authors:', error?.message || 'Unknown error');
+      setAuthors([]);
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this author?')) return;
-
+  async function toggleVisibility(id: string, currentVisibility: boolean) {
     try {
       const { error } = await supabase
         .from('authors')
-        .delete()
+        .update({ is_visible: !currentVisibility })
         .eq('id', id);
 
       if (error) throw error;
       
-      setAuthors(authors.filter(author => author.id !== id));
-    } catch (error) {
-      console.error('Error deleting author:', error);
-      alert('Error deleting author');
+      // Update local state
+      setAuthors(authors.map(author => 
+        author.id === id 
+          ? { ...author, is_visible: !currentVisibility } 
+          : author
+      ));
+    } catch (error: any) {
+      console.error('Error updating author visibility:', error?.message || 'Unknown error');
     }
   }
 
@@ -117,13 +135,10 @@ export default function AuthorsAdmin() {
                         Author
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                        Email
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                        Tags
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                         Articles
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Status
                       </th>
                       <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                         <span className="sr-only">Actions</span>
@@ -133,15 +148,15 @@ export default function AuthorsAdmin() {
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {loading ? (
                       <tr>
-                        <td colSpan={5} className="text-center py-4">Loading...</td>
+                        <td colSpan={4} className="text-center py-4">Loading...</td>
                       </tr>
                     ) : authors.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="text-center py-4">No authors found</td>
+                        <td colSpan={4} className="text-center py-4">No authors found</td>
                       </tr>
                     ) : (
                       authors.map((author) => (
-                        <tr key={author.id}>
+                        <tr key={author.id} className={!author.is_visible ? "bg-gray-50" : ""}>
                           <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                             <div className="flex items-center">
                               <div className="h-10 w-10 flex-shrink-0">
@@ -160,19 +175,16 @@ export default function AuthorsAdmin() {
                             </div>
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {author.email || 'No email'}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            <div className="flex flex-wrap gap-1">
-                              {author.tags && author.tags.map(tag => (
-                                <span key={tag} className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {author.article_count}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm">
+                            <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
+                              author.is_visible 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {author.is_visible ? 'Visible' : 'Hidden'}
+                            </span>
                           </td>
                           <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                             <div className="flex justify-end gap-2">
@@ -183,10 +195,19 @@ export default function AuthorsAdmin() {
                                 <PencilIcon className="h-5 w-5" />
                               </Link>
                               <button
-                                onClick={() => handleDelete(author.id)}
-                                className="text-red-600 hover:text-red-900"
+                                onClick={() => toggleVisibility(author.id, author.is_visible)}
+                                className={`${
+                                  author.is_visible 
+                                    ? 'text-gray-600 hover:text-gray-900' 
+                                    : 'text-green-600 hover:text-green-900'
+                                }`}
+                                title={author.is_visible ? 'Hide author' : 'Show author'}
                               >
-                                <TrashIcon className="h-5 w-5" />
+                                {author.is_visible ? (
+                                  <EyeSlashIcon className="h-5 w-5" />
+                                ) : (
+                                  <EyeIcon className="h-5 w-5" />
+                                )}
                               </button>
                             </div>
                           </td>

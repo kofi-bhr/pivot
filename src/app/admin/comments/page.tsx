@@ -11,13 +11,11 @@ interface Comment {
   content: string;
   created_at: string;
   status: 'pending' | 'approved' | 'rejected';
+  article_id: number;
+  commenter_name: string;
   article: {
     id: number;
     title: string;
-  };
-  author: {
-    name: string;
-    email: string;
   };
 }
 
@@ -38,19 +36,15 @@ export default function CommentsAdmin() {
           article:article_id (
             id,
             title
-          ),
-          author:author_id (
-            name,
-            email
           )
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       setComments(data || []);
-    } catch (error) {
-      console.error('Error fetching comments:', error);
-      alert('Error fetching comments');
+    } catch (error: any) {
+      console.error('Error fetching comments:', error?.message || 'Unknown error');
+      setComments([]);
     } finally {
       setLoading(false);
     }
@@ -68,9 +62,8 @@ export default function CommentsAdmin() {
       setComments(comments.map(comment => 
         comment.id === id ? { ...comment, status } : comment
       ));
-    } catch (error) {
-      console.error('Error updating comment:', error);
-      alert('Error updating comment');
+    } catch (error: any) {
+      console.error('Error updating comment:', error?.message || 'Unknown error');
     }
   }
 
@@ -86,9 +79,8 @@ export default function CommentsAdmin() {
       if (error) throw error;
       
       setComments(comments.filter(comment => comment.id !== id));
-    } catch (error) {
-      console.error('Error deleting comment:', error);
-      alert('Error deleting comment');
+    } catch (error: any) {
+      console.error('Error deleting comment:', error?.message || 'Unknown error');
     }
   }
 
@@ -118,7 +110,7 @@ export default function CommentsAdmin() {
                         Article
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                        Author
+                        Commenter
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                         Status
@@ -154,8 +146,7 @@ export default function CommentsAdmin() {
                             </a>
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            <div>{comment.author.name}</div>
-                            <div className="text-xs">{comment.author.email}</div>
+                            {comment.commenter_name}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm">
                             <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
