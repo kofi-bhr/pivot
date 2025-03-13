@@ -1,27 +1,9 @@
 import { supabase } from '@/lib/supabase';
 import ArticleCard from '@/components/articles/ArticleCard';
 import Layout from '@/components/layout/Layout';
+import type { Article, Author } from '@/lib/supabase';
 
-// Define our own article type to avoid conflicts with imported types
-interface ArticleData {
-  id: string;
-  title: string;
-  cover_image_url: string | null;
-  published_at: string | null;
-  content?: string;
-  author_id: string;
-  created_at: string;
-  updated_at: string;
-  authors?: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    image_url?: string;
-  }[];
-  tags: string[];
-}
-
-async function getArticles(): Promise<ArticleData[]> {
+async function getArticles() {
   console.log('Fetching articles for articles page');
   
   // Query the articles table with the correct structure - using the same structure as the homepage
@@ -50,21 +32,28 @@ async function getArticles(): Promise<ArticleData[]> {
 
   console.log('Found articles:', data);
 
-  // Transform the data to match the structure expected by ArticleCard
-  return data.map((article: any) => ({
-    id: article.id,
-    title: article.title,
-    cover_image_url: article.cover_image_url,
-    published_at: article.published_at,
-    content: article.content,
-    author_id: article.author_id,
-    created_at: article.created_at,
-    updated_at: article.updated_at,
-    // The ArticleCard component expects authors as an array
-    authors: article.author ? [article.author] : [],
-    // Ensure tags is an array
-    tags: Array.isArray(article.tags) ? article.tags : []
-  }));
+  // Transform the data to ensure proper typing
+  const articles: Article[] = [];
+  
+  for (const article of data) {
+    // Ensure author is properly structured as a single object, not an array
+    const authorData = Array.isArray(article.author) ? article.author[0] : article.author;
+    
+    articles.push({
+      id: article.id,
+      title: article.title,
+      cover_image_url: article.cover_image_url || undefined,
+      published_at: article.published_at,
+      content: article.content || '',
+      author_id: article.author_id,
+      created_at: article.created_at,
+      updated_at: article.updated_at,
+      author: authorData as Author,
+      tags: Array.isArray(article.tags) ? article.tags : []
+    });
+  }
+  
+  return articles;
 }
 
 export default async function ArticlesPage() {
@@ -86,7 +75,7 @@ export default async function ArticlesPage() {
         {articles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {articles.map((article) => (
-              <ArticleCard key={article.id} article={article as any} />
+              <ArticleCard key={article.id} article={article} />
             ))}
           </div>
         ) : (
@@ -105,4 +94,4 @@ export default async function ArticlesPage() {
       </div>
     </Layout>
   );
-} 
+}

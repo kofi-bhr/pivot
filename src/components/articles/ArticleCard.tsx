@@ -9,58 +9,101 @@ interface ArticleCardProps {
 }
 
 export default function ArticleCard({ article, featured = false }: ArticleCardProps) {
+  // Function to truncate text
+  const truncateText = (text: string | null | undefined, maxLength: number = 120): string => {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
+  // Format the date safely
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    try {
+      return format(new Date(dateString), 'MMM d, yyyy');
+    } catch {
+      return '';
+    }
+  };
+
   return (
-    <div className={`group relative flex flex-col ${featured ? 'col-span-2 row-span-2' : ''}`}>
+    <div className={`group relative flex flex-col h-full ${featured ? 'col-span-2 row-span-2' : ''}`}>
       <div className="relative w-full overflow-hidden rounded-lg">
         <Link href={`/articles/${article.id}`}>
-          <Image
-            src={article.cover_image_url}
-            alt={article.title}
-            width={featured ? 800 : 400}
-            height={featured ? 450 : 225}
-            className="h-[225px] w-full object-cover transition duration-300 group-hover:scale-105"
-          />
+          {article.cover_image_url ? (
+            <div className="relative h-[225px] w-full">
+              <Image
+                src={article.cover_image_url}
+                alt={article.title}
+                fill
+                className="object-cover transition duration-300 group-hover:scale-105"
+              />
+            </div>
+          ) : (
+            <div className="h-[225px] w-full bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-400">No image</span>
+            </div>
+          )}
         </Link>
       </div>
-      <div className="mt-4 flex flex-col">
-        <div className="flex items-center gap-x-2">
-          {article.tags?.map((tag) => (
+      <div className="mt-4 flex flex-col flex-grow">
+        <div className="flex items-center gap-x-2 mb-2">
+          {article.tags && article.tags.length > 0 && article.tags.map((tag, index) => (
             <Link
-              key={tag.id}
-              href={`/tags/${tag.name}`}
+              key={index}
+              href={`/topics/${encodeURIComponent(tag)}`}
               className="text-xs font-medium text-blue-600 hover:text-blue-800"
             >
-              {tag.name}
+              {tag}
             </Link>
           ))}
           <span className="text-xs text-gray-500">
-            {format(new Date(article.published_at), 'MMM d, yyyy')}
+            {formatDate(article.published_at)}
           </span>
         </div>
         <Link href={`/articles/${article.id}`} className="mt-2 group-hover:underline">
-          <h3 className={`font-semibold text-gray-900 ${featured ? 'text-2xl' : 'text-lg'}`}>
+          <h3 className={`font-semibold text-gray-900 ${featured ? 'text-2xl' : 'text-lg'} mb-3`}>
             {article.title}
           </h3>
         </Link>
-        {article.authors && article.authors.length > 0 && (
-          <div className="mt-4 flex items-center gap-x-2">
-            {article.authors.map((author) => (
-              <Link key={author.id} href={`/authors/${author.id}`} className="flex items-center">
-                <Image
-                  src={author.image_url}
-                  alt={`${author.first_name} ${author.last_name}`}
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                />
-                <span className="ml-2 text-sm text-gray-600 hover:text-gray-900">
-                  {author.first_name} {author.last_name}
-                </span>
+        
+        {article.content && (
+          <p className="text-gray-600 text-sm mb-4 text-justify leading-relaxed">
+            {truncateText(article.content)}
+            {article.content.length > 120 && (
+              <Link href={`/articles/${article.id}`}>
+                <span className="font-bold ml-1" style={{ color: '#293A4A' }}>READ MORE</span>
               </Link>
-            ))}
+            )}
+          </p>
+        )}
+        
+        {article.author && (
+          <div className="mt-auto flex items-center gap-x-2">
+            <Link href={`/authors/${article.author.id}`} className="flex items-center">
+              {article.author.image_url ? (
+                <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                  <Image
+                    src={article.author.image_url}
+                    alt={`${article.author.first_name} ${article.author.last_name}`}
+                    width={32}
+                    height={32}
+                    className="rounded-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-xs text-gray-500">
+                    {article.author.first_name.charAt(0)}{article.author.last_name.charAt(0)}
+                  </span>
+                </div>
+              )}
+              <span className="ml-2 text-sm text-gray-600 hover:text-gray-900">
+                {article.author.first_name} {article.author.last_name}
+              </span>
+            </Link>
           </div>
         )}
       </div>
     </div>
   );
-} 
+}

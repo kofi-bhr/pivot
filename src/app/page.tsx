@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import Image from 'next/image';
 import Layout from '@/components/layout/Layout';
+import React from 'react';
 
 interface Author {
   id: number;
@@ -114,10 +116,9 @@ async function getRecentArticles(): Promise<Article[]> {
 }
 
 // Helper function to truncate text
-function truncateText(text: string | null | undefined, maxLength: number = 150, addReadMore: boolean = false): string {
+function truncateText(text: string | null | undefined, maxLength: number = 150): string {
   if (!text) return '';
-  const truncated = text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-  return addReadMore ? truncated + ' READ MORE' : truncated;
+  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 }
 
 // Helper function to get unique authors from articles
@@ -141,11 +142,11 @@ export default async function Home() {
 
   const featuredArticle = articles[0];
   const secondaryArticles = articles.slice(1, 3);
-  const moreArticles = recentArticles.slice(3, 6);
+  // const moreArticles = recentArticles.slice(3, 6);
 
   // Get unique tags from all articles for topic sections
-  const allTags = [...new Set(recentArticles.flatMap(article => article.tags))];
-  const featuredTags = allTags.slice(0, 3);
+  // const allTags = [...new Set(recentArticles.flatMap(article => article.tags))];
+  // const featuredTags = allTags.slice(0, 3);
   
   // Get unique authors for contributors section
   const contributors = getUniqueAuthors([...articles, ...recentArticles]);
@@ -162,14 +163,17 @@ export default async function Home() {
                 <div className="cfr-featured-article">
                   <div className="relative mb-6">
                     {featuredArticle.cover_image_url && (
-                      <img 
-                        src={featuredArticle.cover_image_url} 
-                        alt={featuredArticle.title}
-                        className="cfr-article-image cfr-featured-image w-full object-cover"
-                      />
+                      <div className="relative w-full h-[400px]">
+                        <Image 
+                          src={featuredArticle.cover_image_url} 
+                          alt={featuredArticle.title}
+                          fill
+                          className="object-cover cfr-article-image cfr-featured-image"
+                        />
+                      </div>
                     )}
                     {featuredArticle.tags && featuredArticle.tags.length > 0 && (
-                      <span className="cfr-topic-label absolute top-3 left-3 z-10">{featuredArticle.tags[0]}</span>
+                      <span className="cfr-topic-label absolute top-0 left-0 z-10">{featuredArticle.tags[0]}</span>
                     )}
                   </div>
                   <div className="mb-8">
@@ -177,7 +181,12 @@ export default async function Home() {
                       <h2 className="cfr-article-title text-2xl mb-3">{featuredArticle.title}</h2>
                     </Link>
                     <p className="text-gray-600 mb-3">
-                      {truncateText(featuredArticle.content, 250, true)}
+                      {truncateText(featuredArticle.content, 250)}
+                      {featuredArticle.content && featuredArticle.content.length > 250 && (
+                        <Link href={`/articles/${featuredArticle.id}`}>
+                          <span className="font-bold" style={{ color: '#293A4A' }}> READ MORE</span>
+                        </Link>
+                      )}
                     </p>
                     <div className="cfr-article-meta">
                       <span>Article by </span>
@@ -198,21 +207,29 @@ export default async function Home() {
                   <div key={article.id} className="cfr-article-card">
                     <div className="relative mb-4">
                       {article.cover_image_url && (
-                        <img 
-                          src={article.cover_image_url} 
-                          alt={article.title}
-                          className="cfr-article-image cfr-secondary-image w-full object-cover"
-                        />
+                        <div className="relative w-full h-[200px]">
+                          <Image 
+                            src={article.cover_image_url} 
+                            alt={article.title}
+                            fill
+                            className="object-cover cfr-article-image cfr-secondary-image"
+                          />
+                        </div>
                       )}
                       {article.tags && article.tags.length > 0 && (
-                        <span className="cfr-topic-label absolute top-3 left-3 z-10">{article.tags[0]}</span>
+                        <span className="cfr-topic-label absolute top-0 left-0 z-10">{article.tags[0]}</span>
                       )}
                     </div>
                     <Link href={`/articles/${article.id}`}>
                       <h3 className="cfr-article-title text-xl mb-2">{article.title}</h3>
                     </Link>
                     <p className="text-gray-600 text-sm mb-2">
-                      {truncateText(article.content, 150, true)}
+                      {truncateText(article.content, 120)}
+                      {article.content && article.content.length > 120 && (
+                        <Link href={`/articles/${article.id}`}>
+                          <span className="font-bold" style={{ color: '#293A4A' }}> READ MORE</span>
+                        </Link>
+                      )}
                     </p>
                     <div className="cfr-article-meta">
                       <span>Article by </span>
@@ -225,42 +242,6 @@ export default async function Home() {
                     </div>
                   </div>
                 ))}
-              </div>
-
-              {/* Contributors Section */}
-              <div className="mb-12">
-                <h2 className="cfr-section-title mb-6">Contributors</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {contributors.slice(0, 6).map(author => (
-                    <div key={author.id} className="cfr-contributor flex items-center gap-4 pb-4 border-b border-gray-100">
-                      <div className="relative flex-shrink-0" style={{ width: '60px', height: '60px' }}>
-                        {author.image_url ? (
-                          <img 
-                            src={author.image_url} 
-                            alt={author.name || `${author.first_name} ${author.last_name}`}
-                            className="w-full h-full object-cover rounded-full"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
-                            <span className="text-gray-500 text-xl font-medium">
-                              {author.first_name.charAt(0)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <Link href={`/authors/${author.id}`}>
-                          <h3 className="cfr-author-name text-base font-medium mb-1">
-                            {author.name || `${author.first_name} ${author.last_name}`}
-                          </h3>
-                        </Link>
-                        <p className="text-gray-600 text-sm">
-                          Contributor
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
             </section>
           </div>
@@ -277,7 +258,12 @@ export default async function Home() {
                       <h3 className="cfr-article-title text-base mb-1">{article.title}</h3>
                     </Link>
                     <p className="text-gray-600 text-sm mb-1">
-                      {truncateText(article.content, 100, true)}
+                      {truncateText(article.content, 100)}
+                      {article.content && article.content.length > 100 && (
+                        <Link href={`/articles/${article.id}`}>
+                          <span className="font-bold" style={{ color: '#293A4A' }}> READ MORE</span>
+                        </Link>
+                      )}
                     </p>
                     <div className="cfr-article-meta text-sm">
                       <span>By </span>
@@ -293,15 +279,46 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* Topics */}
+            {/* Contributors Section */}
             <div>
-              <h2 className="cfr-section-title mb-4">Topics</h2>
-              <div className="space-y-2">
-                {featuredTags.map(tag => (
-                  <Link key={tag} href={`/topics/${tag}`} className="cfr-topic-card block p-4 border border-gray-100 hover:border-gray-300">
-                    <h3 className="font-medium">{tag}</h3>
-                  </Link>
+              <h2 className="cfr-section-title mb-4">Contributors</h2>
+              <div className="space-y-4">
+                {contributors.slice(0, 4).map(author => (
+                  <div key={author.id} className="cfr-contributor flex items-center gap-3 pb-3 border-b border-gray-100">
+                    <div className="relative flex-shrink-0" style={{ width: '50px', height: '50px' }}>
+                      {author.image_url ? (
+                        <Image 
+                          src={author.image_url} 
+                          alt={author.name || `${author.first_name} ${author.last_name}`}
+                          width={50}
+                          height={50}
+                          className="object-cover rounded-full"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
+                          <span className="text-gray-500 text-xl font-medium">
+                            {author.first_name.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <Link href={`/authors/${author.id}`}>
+                        <h3 className="cfr-author-name text-base font-medium mb-1">
+                          {author.name || `${author.first_name} ${author.last_name}`}
+                        </h3>
+                      </Link>
+                      <p className="text-gray-600 text-sm">
+                        Contributor
+                      </p>
+                    </div>
+                  </div>
                 ))}
+                <div className="pt-2">
+                  <Link href="/authors" className="text-sm font-medium text-gray-600 hover:text-gray-900">
+                    View all contributors →
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

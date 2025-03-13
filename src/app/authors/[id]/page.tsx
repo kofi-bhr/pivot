@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import Layout from '@/components/layout/Layout';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
 interface Author {
@@ -134,11 +135,15 @@ export default async function AuthorPage({ params }: { params: { id: string } })
         <div className="mb-12">
           <div className="flex items-center gap-6">
             {author.image_url && (
-              <img
-                src={author.image_url}
-                alt={`${author.first_name} ${author.last_name}`}
-                className="w-24 h-24 rounded-full"
-              />
+              <div className="relative w-24 h-24">
+                <Image
+                  src={author.image_url}
+                  alt={`${author.first_name} ${author.last_name}`}
+                  width={96}
+                  height={96}
+                  className="rounded-full"
+                />
+              </div>
             )}
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
@@ -165,11 +170,14 @@ export default async function AuthorPage({ params }: { params: { id: string } })
           {articles.map(article => (
             <div key={article.id} className="bg-white rounded-lg shadow-md overflow-hidden">
               {article.cover_image_url && (
-                <img 
-                  src={article.cover_image_url} 
-                  alt={article.title}
-                  className="w-full h-48 object-cover"
-                />
+                <div className="relative w-full h-48">
+                  <Image 
+                    src={article.cover_image_url} 
+                    alt={article.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
               )}
               <div className="p-4">
                 <Link href={`/articles/${article.id}`} className="hover:text-blue-600 transition-colors">

@@ -1,5 +1,4 @@
 import Layout from '@/components/layout/Layout';
-import Image from 'next/image';
 
 export default function About() {
   return (
@@ -7,59 +6,52 @@ export default function About() {
       <div className="bg-white">
         {/* Hero section */}
         <div className="relative isolate overflow-hidden bg-gradient-to-b from-blue-100/20">
-          <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-40">
-            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
+          <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:px-8 lg:py-40">
+            <div className="mx-auto max-w-2xl">
               <h1 className="mt-10 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-                About Pivot
+                About PIVOT
               </h1>
               <p className="mt-6 text-lg leading-8 text-gray-600">
-                Pivot is a nonprofit organization dedicated to publishing thoughtful analysis and in-depth
-                research on the most pressing issues of our time. Our mission is to foster informed dialogue and
-                drive positive change through expert insights and evidence-based discourse.
+                PIVOT (Policy Insights and Voices of Tomorrow) is a novel non-profit that transforms high school students into published political analysts. Everyone has opinions, so why not make them heard?
               </p>
-            </div>
-            <div className="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-32">
-              <div className="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
-                <div className="relative aspect-[16/9] w-[37rem] rounded-xl bg-gray-50 shadow-xl ring-1 ring-gray-400/10 sm:w-[57rem]">
-                  <Image
-                    src="/about-hero.jpg"
-                    alt="About Pivot"
-                    fill
-                    className="object-cover rounded-xl"
-                  />
-                </div>
-              </div>
+              <p className="mt-4 text-lg leading-8 text-gray-600">
+                In an era of toxic political division, PIVOT stands as a powerful counterforce. We don&apos;t just publish student opinions—we&apos;re cultivating the next generation of policy insights that cut through polarizing noise with clarity and conviction.
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Values section */}
+        {/* What We Deliver section */}
         <div className="mx-auto mt-32 max-w-7xl px-6 sm:mt-40 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Our Values</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">What PIVOT Delivers</h2>
             <p className="mt-6 text-lg leading-8 text-gray-600">
-              We believe in the power of thoughtful journalism and rigorous analysis to inform and inspire.
+              We&apos;re not just publishing articles: we are building tomorrow&apos;s political landscape.
             </p>
           </div>
-          <dl className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 text-base leading-7 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+          <dl className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 text-base leading-7 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-2">
             <div>
-              <dt className="font-semibold text-gray-900">Integrity</dt>
+              <dt className="font-semibold text-gray-900">A Prestigious Publishing Platform</dt>
               <dd className="mt-1 text-gray-600">
-                We maintain the highest standards of journalistic integrity, ensuring our reporting is accurate,
-                fair, and transparent.
+                Exclusively for high school policy thinkers, providing a space where young voices can be heard beyond classroom walls.
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-gray-900">Independence</dt>
+              <dt className="font-semibold text-gray-900">Rigorous Editorial Mentorship</dt>
               <dd className="mt-1 text-gray-600">
-                Our nonprofit status allows us to pursue stories that matter, free from commercial pressures
-                and conflicts of interest.
+                We demand excellence from our contributors, providing guidance that helps develop their analytical skills and political voice.
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-gray-900">Impact</dt>
+              <dt className="font-semibold text-gray-900">Direct Engagement with Challenging Viewpoints</dt>
               <dd className="mt-1 text-gray-600">
-                We measure our success by the positive change our journalism creates in communities and institutions.
+                We encourage our contributors to engage with diverse political perspectives, fostering a culture of respectful dialogue.
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-gray-900">Access to a Network</dt>
+              <dd className="mt-1 text-gray-600">
+                Connect with ambitious, politically-engaged peers who share your passion for policy and public discourse.
               </dd>
             </div>
           </dl>
@@ -72,22 +64,21 @@ export default function About() {
             <div className="mt-6 flex flex-col gap-x-8 gap-y-20 lg:flex-row">
               <div className="lg:w-full lg:max-w-2xl lg:flex-auto">
                 <p className="text-xl leading-8 text-gray-600">
-                  At Pivot, we believe that well-researched, thoughtful journalism is essential for a healthy democracy.
-                  We work tirelessly to:
+                  At PIVOT, we believe in the power of young voices to shape the political landscape. We&apos;re redefining youth engagement in politics by:
                 </p>
                 <div className="mt-10 max-w-xl text-base leading-7 text-gray-700">
                   <ul role="list" className="mt-8 space-y-8 text-gray-600">
                     <li className="flex gap-x-3">
-                      <span>• Investigate complex issues with depth and nuance</span>
+                      <span>• Transforming high school students into published political analysts</span>
                     </li>
                     <li className="flex gap-x-3">
-                      <span>• Amplify diverse voices and perspectives</span>
+                      <span>• Cultivating the next generation of policy insights</span>
                     </li>
                     <li className="flex gap-x-3">
-                      <span>• Foster constructive dialogue across different viewpoints</span>
+                      <span>• Cutting through polarizing noise with clarity and conviction</span>
                     </li>
                     <li className="flex gap-x-3">
-                      <span>• Hold power to account through rigorous reporting</span>
+                      <span>• Building a community of ambitious, politically-engaged young thinkers</span>
                     </li>
                   </ul>
                 </div>
@@ -96,46 +87,21 @@ export default function About() {
           </div>
         </div>
 
-        {/* Support section */}
-        <div className="mx-auto mt-32 max-w-7xl px-6 sm:mt-40 lg:px-8">
+        {/* Get Involved section */}
+        <div className="mx-auto mt-32 max-w-7xl px-6 pb-32 sm:mt-40 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Support Our Work</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Get Involved</h2>
             <p className="mt-6 text-lg leading-8 text-gray-600">
-              As a nonprofit organization, we rely on the support of readers like you to continue our important work.
-              Your contribution helps us maintain our independence and pursue impactful journalism.
+              Are you a high schooler or college student ready to make your voice heard beyond classroom walls? Do you lead an organization of young political thinkers? PIVOT is actively seeking bold voices and strategic partners.
             </p>
             <div className="mt-10">
               <a
                 href="#"
                 className="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
               >
-                Donate Now
+                Join PIVOT
               </a>
             </div>
-          </div>
-        </div>
-
-        {/* Contact section */}
-        <div className="mx-auto mt-32 max-w-7xl px-6 pb-32 sm:mt-40 lg:px-8">
-          <div className="mx-auto max-w-2xl lg:mx-0">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Contact Us</h2>
-            <p className="mt-6 text-lg leading-8 text-gray-600">
-              Have a tip, suggestion, or want to get in touch? We'd love to hear from you.
-            </p>
-            <dl className="mt-10 space-y-4 text-base leading-7 text-gray-600">
-              <div className="flex gap-x-4">
-                <dt className="flex-none">
-                  <span className="font-semibold text-gray-900">Email:</span>
-                </dt>
-                <dd><a href="mailto:contact@pivot.org" className="text-blue-600 hover:text-blue-500">contact@pivot.org</a></dd>
-              </div>
-              <div className="flex gap-x-4">
-                <dt className="flex-none">
-                  <span className="font-semibold text-gray-900">Address:</span>
-                </dt>
-                <dd>123 Journalism Street, Media City, ST 12345</dd>
-              </div>
-            </dl>
           </div>
         </div>
       </div>

@@ -41,7 +41,7 @@ async function getTopics(): Promise<Topic[]> {
     return [];
   }
 
-  return topics.map((topic: any) => ({
+  return topics.map((topic) => ({
     ...topic,
     latest_articles: topic.latest_articles
       .map((at: { articles: Article }) => at.articles)

@@ -4,13 +4,13 @@
   /* CFR color palette */
   --cfr-primary: #121212;
   --cfr-secondary: #6c6c6c;
-  --cfr-accent: #d73a49;
+  --cfr-accent: #293A4A;
   --cfr-background: #ffffff;
   --cfr-border: #e5e5e5;
   --cfr-text-primary: #121212;
   --cfr-text-secondary: #6c6c6c;
   --cfr-link: #121212;
-  --cfr-link-hover: #d73a49;
+  --cfr-link-hover: #293A4A;
   --cfr-tag-bg: #f5f5f5;
 }
 

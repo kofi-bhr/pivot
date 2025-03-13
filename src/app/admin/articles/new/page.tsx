@@ -56,7 +56,7 @@ export default function NewArticle() {
         ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
         : [];
 
-      const { data, error: insertError } = await supabase
+      const { error: insertError } = await supabase
         .from('articles')
         .insert({
           title: formData.title,
