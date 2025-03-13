@@ -16,12 +16,11 @@ interface Author {
   is_visible: boolean;
 }
 
-interface AuthorResponse {
-  id: string;
-  first_name: string;
-  last_name: string;
-  image_url: string | null;
-  articles: { count: number };
+interface SupabaseError {
+  message: string;
+  details?: string;
+  hint?: string;
+  code?: string;
 }
 
 export default function AuthorsAdmin() {
@@ -71,8 +70,9 @@ export default function AuthorsAdmin() {
       );
       
       setAuthors(authorsWithCounts);
-    } catch (error: any) {
-      console.error('Error fetching authors:', error?.message || 'Unknown error');
+    } catch (error: unknown) {
+      const supabaseError = error as SupabaseError;
+      console.error('Error fetching authors:', supabaseError?.message || 'Unknown error');
       setAuthors([]);
     } finally {
       setLoading(false);
@@ -94,8 +94,9 @@ export default function AuthorsAdmin() {
           ? { ...author, is_visible: !currentVisibility } 
           : author
       ));
-    } catch (error: any) {
-      console.error('Error updating author visibility:', error?.message || 'Unknown error');
+    } catch (error: unknown) {
+      const supabaseError = error as SupabaseError;
+      console.error('Error updating author visibility:', supabaseError?.message || 'Unknown error');
     }
   }
 

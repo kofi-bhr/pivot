@@ -19,6 +19,14 @@ interface Comment {
   };
 }
 
+// Define error type
+interface SupabaseError {
+  message: string;
+  details?: string;
+  hint?: string;
+  code?: string;
+}
+
 export default function CommentsAdmin() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,8 +50,9 @@ export default function CommentsAdmin() {
 
       if (error) throw error;
       setComments(data || []);
-    } catch (error: any) {
-      console.error('Error fetching comments:', error?.message || 'Unknown error');
+    } catch (error: unknown) {
+      const supabaseError = error as SupabaseError;
+      console.error('Error fetching comments:', supabaseError?.message || 'Unknown error');
       setComments([]);
     } finally {
       setLoading(false);
@@ -62,8 +71,9 @@ export default function CommentsAdmin() {
       setComments(comments.map(comment => 
         comment.id === id ? { ...comment, status } : comment
       ));
-    } catch (error: any) {
-      console.error('Error updating comment:', error?.message || 'Unknown error');
+    } catch (error: unknown) {
+      const supabaseError = error as SupabaseError;
+      console.error('Error updating comment:', supabaseError?.message || 'Unknown error');
     }
   }
 
@@ -79,8 +89,9 @@ export default function CommentsAdmin() {
       if (error) throw error;
       
       setComments(comments.filter(comment => comment.id !== id));
-    } catch (error: any) {
-      console.error('Error deleting comment:', error?.message || 'Unknown error');
+    } catch (error: unknown) {
+      const supabaseError = error as SupabaseError;
+      console.error('Error deleting comment:', supabaseError?.message || 'Unknown error');
     }
   }
 

@@ -5,6 +5,14 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
+// Define error type
+interface SupabaseError {
+  message: string;
+  details?: string;
+  hint?: string;
+  code?: string;
+}
+
 export default function EditAuthor({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -37,8 +45,9 @@ export default function EditAuthor({ params }: { params: { id: string } }) {
             is_visible: data.is_visible !== undefined ? data.is_visible : true,
           });
         }
-      } catch (error: any) {
-        console.error('Error fetching author:', error?.message || 'Unknown error');
+      } catch (error: unknown) {
+        const supabaseError = error as SupabaseError;
+        console.error('Error fetching author:', supabaseError?.message || 'Unknown error');
         alert('Failed to load author data. Please try again.');
       } finally {
         setLoading(false);
@@ -68,8 +77,9 @@ export default function EditAuthor({ params }: { params: { id: string } }) {
       if (error) throw error;
 
       router.push('/admin/authors');
-    } catch (error: any) {
-      console.error('Error updating author:', error?.message || 'Unknown error');
+    } catch (error: unknown) {
+      const supabaseError = error as SupabaseError;
+      console.error('Error updating author:', supabaseError?.message || 'Unknown error');
       alert('Failed to update author. Please try again.');
     } finally {
       setIsSubmitting(false);

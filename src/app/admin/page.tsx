@@ -118,9 +118,9 @@ export default async function AdminDashboard() {
             </div>
             <div className="bg-gray-50 px-5 py-3">
               <div className="text-sm">
-                <span className="font-medium text-gray-500">
-                  Comments Management Coming Soon
-                </span>
+                <Link href="/admin/comments" className="font-medium text-blue-700 hover:text-blue-900">
+                  View all
+                </Link>
               </div>
             </div>
           </div>
