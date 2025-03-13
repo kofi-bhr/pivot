@@ -64,6 +64,9 @@ export default function Footer() {
             <p className="text-gray-600 text-sm mb-4 max-w-md">
               PIVOT (Policy Insights and Voices of Tomorrow) transforms high school students into published political analysts. In an era of toxic political division, we stand as a powerful counterforce.
             </p>
+            <p className="text-gray-600 text-sm mb-4">
+              <span className="font-medium">Contact us:</span> <a href="mailto:pivot.policy@gmail.com" className="hover:text-blue-600 transition-colors">pivot.policy@gmail.com</a>
+            </p>
             {showEasterEgg && (
               <div className="text-xs text-gray-400 mt-2 transition-opacity duration-500 ease-in-out">
                 Built with ❤️ by high schooler{' '}
