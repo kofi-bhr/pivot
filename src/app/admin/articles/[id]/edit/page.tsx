@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Author } from '@/lib/supabase';
 
-export default function EditArticle({ params }: { params: { id: string } }) {
+// In Next.js 15, params is a Promise, but we can still access it synchronously in client components
+// for backwards compatibility (this will be deprecated in future versions)
+export default function EditArticle({ params }: { params: { id: string } & Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = params;
   const [authors, setAuthors] = useState<Author[]>([]);

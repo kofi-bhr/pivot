@@ -40,10 +40,12 @@ async function runMigration() {
     `;
 
     console.log('Creating exec_sql function...');
-    await supabase.rpc('exec_sql', { query: createFunctionSQL }).catch(() => {
+    try {
+      await supabase.rpc('exec_sql', { query: createFunctionSQL });
+    } catch (error) {
       // Function might already exist, continue
       console.log('Function may already exist, continuing...');
-    });
+    }
 
     console.log('Running migration...');
     await executeSql(supabase, migrationSQL);

@@ -113,7 +113,7 @@ async function getAuthorArticles(authorId: string): Promise<Article[]> {
   }));
 }
 
-export default async function AuthorPage({ params }: { params: { id: string } }) {
+export default async function AuthorPage({ params }: { params: Promise<{ id: string }> }) {
   // Wait for params to be available, then use the ID directly as a string
   const { id } = await params;
   

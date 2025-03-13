@@ -65,7 +65,7 @@ export const initTitleChangeEasterEgg = (): () => void => {
 };
 
 // Generate a Kofi comment for articles
-export const generateKofiComment = (articleId: number) => {
+export const generateKofiComment = (articleId: number | string) => {
   // Only show this easter egg 5% of the time
   if (!shouldShowEasterEgg(0.05)) return null;
   

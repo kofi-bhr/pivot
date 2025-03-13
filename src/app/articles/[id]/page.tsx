@@ -57,12 +57,34 @@ async function getArticle(id: string): Promise<Article | null> {
   }
 
   console.log('Found article:', data);
+  console.log('Author data structure:', JSON.stringify(data.author));
+  
+  // Handle author data, which could be an array or object
+  interface AuthorData {
+    id?: string;
+    first_name?: string;
+    last_name?: string;
+    image_url?: string | null;
+  }
+  
+  let authorData: AuthorData = {};
+  if (Array.isArray(data.author)) {
+    authorData = data.author[0] || {};
+  } else {
+    authorData = data.author || {};
+  }
+  
   return {
     ...data,
     tags: data.tags || [],
     author: {
-      ...data.author,
-      name: `${data.author.first_name} ${data.author.last_name}`
+      id: authorData.id || '',
+      first_name: authorData.first_name || '',
+      last_name: authorData.last_name || '',
+      image_url: authorData.image_url || null,
+      name: authorData.first_name && authorData.last_name 
+        ? `${authorData.first_name} ${authorData.last_name}`
+        : 'Unknown Author'
     }
   };
 }
@@ -84,7 +106,7 @@ async function getArticleComments(articleId: string): Promise<Comment[]> {
   return data || [];
 }
 
-export default async function ArticlePage({ params }: { params: { id: string } }) {
+export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
   // Wait for params to be available, then use the ID directly as a string
   const { id } = await params;
   

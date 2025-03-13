@@ -6,7 +6,7 @@ import { generateKofiComment } from '@/lib/easterEggs';
 
 interface Comment {
   id: number | string;
-  article_id: number;
+  article_id: number | string;
   commenter_name: string;
   content: string;
   created_at: string;
@@ -14,7 +14,7 @@ interface Comment {
 }
 
 interface CommentSectionProps {
-  articleId: number;
+  articleId: number | string;
   initialComments: Comment[];
 }
 
