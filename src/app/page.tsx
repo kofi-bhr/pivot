@@ -10,6 +10,7 @@ interface Author {
   last_name: string;
   image_url: string | null;
   name?: string;
+  is_visible: boolean;
 }
 
 interface Article {
@@ -34,6 +35,7 @@ interface ArticleRow {
     first_name: string;
     last_name: string;
     image_url: string | null;
+    is_visible: boolean;
   };
 }
 
@@ -44,7 +46,7 @@ async function getFeaturedArticles(): Promise<Article[]> {
     .select(`
       id, title, cover_image_url, published_at, content, tags,
       author:author_id (
-        id, first_name, last_name, image_url
+        id, first_name, last_name, image_url, is_visible
       )
     `)
     .eq('is_visible', true)
@@ -59,7 +61,11 @@ async function getFeaturedArticles(): Promise<Article[]> {
   }
 
   console.log('Found featured articles:', data);
-  return (data || []).map(article => ({
+  
+  // Filter out articles with non-visible authors
+  const filteredArticles = (data || []).filter(article => article.author.is_visible);
+  
+  return filteredArticles.map(article => ({
     id: article.id,
     title: article.title,
     cover_image_url: article.cover_image_url,
@@ -71,6 +77,7 @@ async function getFeaturedArticles(): Promise<Article[]> {
       first_name: article.author.first_name,
       last_name: article.author.last_name,
       image_url: article.author.image_url,
+      is_visible: article.author.is_visible,
       name: `${article.author.first_name} ${article.author.last_name}`
     }
   }));
@@ -83,7 +90,7 @@ async function getRecentArticles(): Promise<Article[]> {
     .select(`
       id, title, cover_image_url, published_at, content, tags,
       author:author_id (
-        id, first_name, last_name, image_url
+        id, first_name, last_name, image_url, is_visible
       )
     `)
     .eq('is_visible', true)
@@ -98,7 +105,11 @@ async function getRecentArticles(): Promise<Article[]> {
   }
 
   console.log('Found recent articles:', data);
-  return (data || []).map(article => ({
+  
+  // Filter out articles with non-visible authors
+  const filteredArticles = (data || []).filter(article => article.author.is_visible);
+  
+  return filteredArticles.map(article => ({
     id: article.id,
     title: article.title,
     cover_image_url: article.cover_image_url,
@@ -110,6 +121,7 @@ async function getRecentArticles(): Promise<Article[]> {
       first_name: article.author.first_name,
       last_name: article.author.last_name,
       image_url: article.author.image_url,
+      is_visible: article.author.is_visible,
       name: `${article.author.first_name} ${article.author.last_name}`
     }
   }));
@@ -148,7 +160,7 @@ export default async function Home() {
   // const allTags = [...new Set(recentArticles.flatMap(article => article.tags))];
   // const featuredTags = allTags.slice(0, 3);
   
-  // Get unique authors for contributors section
+  // Get unique authors for contributors section - only visible authors
   const contributors = getUniqueAuthors([...articles, ...recentArticles]);
 
   return (
@@ -201,8 +213,8 @@ export default async function Home() {
                 </div>
               )}
 
-              {/* Secondary Articles Grid */}
-              <div className="grid grid-cols-2 gap-8 mb-12">
+              {/* Secondary Articles */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                 {secondaryArticles.map(article => (
                   <div key={article.id} className="cfr-article-card">
                     <div className="relative mb-4">
@@ -212,7 +224,7 @@ export default async function Home() {
                             src={article.cover_image_url} 
                             alt={article.title}
                             fill
-                            className="object-cover cfr-article-image cfr-secondary-image"
+                            className="object-cover cfr-article-image"
                           />
                         </div>
                       )}
@@ -223,13 +235,8 @@ export default async function Home() {
                     <Link href={`/articles/${article.id}`}>
                       <h3 className="cfr-article-title text-xl mb-2">{article.title}</h3>
                     </Link>
-                    <p className="text-gray-600 text-sm mb-2">
+                    <p className="text-gray-600 mb-2">
                       {truncateText(article.content, 120)}
-                      {article.content && article.content.length > 120 && (
-                        <Link href={`/articles/${article.id}`}>
-                          <span className="font-bold" style={{ color: '#293A4A' }}> READ MORE</span>
-                        </Link>
-                      )}
                     </p>
                     <div className="cfr-article-meta">
                       <span>Article by </span>
@@ -244,29 +251,30 @@ export default async function Home() {
                 ))}
               </div>
             </section>
-          </div>
 
-          {/* Sidebar */}
-          <div className="cfr-sidebar">
-            {/* Recent Articles */}
-            <div className="mb-8">
-              <h2 className="cfr-section-title mb-4">Recent Articles</h2>
-              <div className="space-y-4">
-                {recentArticles.slice(0, 3).map(article => (
-                  <div key={article.id} className="cfr-sidebar-article pb-4 border-b border-gray-100">
-                    <Link href={`/articles/${article.id}`}>
-                      <h3 className="cfr-article-title text-base mb-1">{article.title}</h3>
-                    </Link>
-                    <p className="text-gray-600 text-sm mb-1">
-                      {truncateText(article.content, 100)}
-                      {article.content && article.content.length > 100 && (
-                        <Link href={`/articles/${article.id}`}>
-                          <span className="font-bold" style={{ color: '#293A4A' }}> READ MORE</span>
-                        </Link>
+            {/* Recent Articles Section */}
+            <section className="mb-12">
+              <h2 className="cfr-section-title mb-6">Recent Articles</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recentArticles.slice(0, 6).map(article => (
+                  <div key={article.id} className="cfr-article-card">
+                    <div className="relative mb-4">
+                      {article.cover_image_url && (
+                        <div className="relative w-full h-[150px]">
+                          <Image 
+                            src={article.cover_image_url} 
+                            alt={article.title}
+                            fill
+                            className="object-cover cfr-article-image"
+                          />
+                        </div>
                       )}
-                    </p>
-                    <div className="cfr-article-meta text-sm">
-                      <span>By </span>
+                    </div>
+                    <Link href={`/articles/${article.id}`}>
+                      <h3 className="cfr-article-title text-lg mb-2">{article.title}</h3>
+                    </Link>
+                    <div className="cfr-article-meta">
+                      <span>Article by </span>
                       <Link 
                         href={`/authors/${article.author.id}`}
                         className="cfr-author-link"
@@ -277,50 +285,40 @@ export default async function Home() {
                   </div>
                 ))}
               </div>
-            </div>
+            </section>
 
             {/* Contributors Section */}
-            <div>
-              <h2 className="cfr-section-title mb-4">Contributors</h2>
-              <div className="space-y-4">
-                {contributors.slice(0, 4).map(author => (
-                  <div key={author.id} className="cfr-contributor flex items-center gap-3 pb-3 border-b border-gray-100">
-                    <div className="relative flex-shrink-0" style={{ width: '50px', height: '50px' }}>
+            <section className="mb-12">
+              <h2 className="cfr-section-title mb-6">Our Contributors</h2>
+              <div className="flex flex-wrap gap-4">
+                {contributors.map(author => (
+                  <Link 
+                    key={author.id}
+                    href={`/authors/${author.id}`}
+                    className="flex items-center bg-white p-2 rounded-full shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="relative w-10 h-10 mr-2">
                       {author.image_url ? (
                         <Image 
                           src={author.image_url} 
                           alt={author.name || `${author.first_name} ${author.last_name}`}
-                          width={50}
-                          height={50}
-                          className="object-cover rounded-full"
+                          width={40}
+                          height={40}
+                          className="rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
-                          <span className="text-gray-500 text-xl font-medium">
-                            {author.first_name.charAt(0)}
+                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-500 font-medium">
+                            {author.first_name.charAt(0)}{author.last_name.charAt(0)}
                           </span>
                         </div>
                       )}
                     </div>
-                    <div>
-                      <Link href={`/authors/${author.id}`}>
-                        <h3 className="cfr-author-name text-base font-medium mb-1">
-                          {author.name || `${author.first_name} ${author.last_name}`}
-                        </h3>
-                      </Link>
-                      <p className="text-gray-600 text-sm">
-                        Contributor
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                <div className="pt-2">
-                  <Link href="/authors" className="text-sm font-medium text-gray-600 hover:text-gray-900">
-                    View all contributors →
+                    <span className="font-medium">{author.name || `${author.first_name} ${author.last_name}`}</span>
                   </Link>
-                </div>
+                ))}
               </div>
-            </div>
+            </section>
           </div>
         </div>
       </div>

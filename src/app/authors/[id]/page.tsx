@@ -54,6 +54,7 @@ async function getAuthor(id: string): Promise<Author | null> {
     .from('authors')
     .select('id, first_name, last_name, image_url, description, tags')
     .eq('id', id)
+    .eq('is_visible', true)
     .single()
     .returns<AuthorRow>();
 

@@ -53,3 +53,52 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Author ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Check if author has any articles
+    const { count, error: countError } = await supabase
+      .from('articles')
+      .select('*', { count: 'exact', head: true })
+      .eq('author_id', id);
+
+    if (countError) {
+      throw countError;
+    }
+
+    if (count && count > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete author with existing articles' },
+        { status: 400 }
+      );
+    }
+
+    // Delete the author
+    const { error } = await supabase
+      .from('authors')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting author:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete author' },
+      { status: 500 }
+    );
+  }
+}

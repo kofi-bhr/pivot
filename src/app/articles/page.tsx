@@ -12,7 +12,7 @@ async function getArticles() {
     .select(`
       id, title, cover_image_url, published_at, content, created_at, updated_at, author_id, tags,
       author:author_id (
-        id, first_name, last_name, image_url
+        id, first_name, last_name, image_url, is_visible
       )
     `)
     .eq('is_visible', true)
@@ -38,6 +38,11 @@ async function getArticles() {
   for (const article of data) {
     // Ensure author is properly structured as a single object, not an array
     const authorData = Array.isArray(article.author) ? article.author[0] : article.author;
+    
+    // Skip articles with non-visible authors
+    if (authorData && authorData.is_visible === false) {
+      continue;
+    }
     
     articles.push({
       id: article.id,

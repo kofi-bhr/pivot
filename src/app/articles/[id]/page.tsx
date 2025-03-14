@@ -12,6 +12,7 @@ interface Author {
   last_name: string;
   image_url: string | null;
   name?: string;
+  is_visible: boolean;
 }
 
 interface Article {
@@ -39,7 +40,7 @@ async function getArticle(id: string): Promise<Article | null> {
     .select(`
       id, title, content, cover_image_url, published_at, tags,
       author:author_id (
-        id, first_name, last_name, image_url
+        id, first_name, last_name, image_url, is_visible
       )
     `)
     .eq('id', id)
@@ -65,6 +66,7 @@ async function getArticle(id: string): Promise<Article | null> {
     first_name?: string;
     last_name?: string;
     image_url?: string | null;
+    is_visible?: boolean;
   }
   
   let authorData: AuthorData = {};
@@ -72,6 +74,12 @@ async function getArticle(id: string): Promise<Article | null> {
     authorData = data.author[0] || {};
   } else {
     authorData = data.author || {};
+  }
+  
+  // If author is not visible, return null (article should not be accessible)
+  if (authorData.is_visible === false) {
+    console.log('Author is not visible, returning null');
+    return null;
   }
   
   return {
@@ -82,6 +90,7 @@ async function getArticle(id: string): Promise<Article | null> {
       first_name: authorData.first_name || '',
       last_name: authorData.last_name || '',
       image_url: authorData.image_url || null,
+      is_visible: authorData.is_visible === undefined ? true : authorData.is_visible, // Default to true if undefined
       name: authorData.first_name && authorData.last_name 
         ? `${authorData.first_name} ${authorData.last_name}`
         : 'Unknown Author'
@@ -200,18 +209,23 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             </p>
           ))}
         </div>
-
-        <div className="flex flex-wrap gap-2 mb-12">
-          {article.tags.map(tag => (
-            <Link key={tag} href={`/topics/${encodeURIComponent(tag)}`}>
-              <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition-colors">
+        
+        {/* Tags */}
+        {article.tags && article.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-12">
+            {article.tags.map(tag => (
+              <Link 
+                key={tag} 
+                href={`/topics?tag=${encodeURIComponent(tag)}`}
+                className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition-colors"
+              >
                 {tag}
-              </span>
-            </Link>
-          ))}
-        </div>
-
-        <CommentSection articleId={article.id} initialComments={comments} />
+              </Link>
+            ))}
+          </div>
+        )}
+        
+        <CommentSection articleId={articleId} initialComments={comments} />
       </article>
     </Layout>
   );

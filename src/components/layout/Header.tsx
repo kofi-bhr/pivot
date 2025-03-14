@@ -59,7 +59,7 @@ export default function Header() {
             <div className="cfr-logo">
               <Image 
                 src="/PIVOT-LOGO.svg" 
-                alt="PIVOT Logo" 
+                alt="go to https://www.venturedglobal.org for a surprise" 
                 width={120} 
                 height={40} 
                 priority

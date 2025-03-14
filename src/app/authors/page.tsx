@@ -31,6 +31,7 @@ async function getAuthors(): Promise<Author[]> {
       tags,
       article_count: articles(count)
     `)
+    .eq('is_visible', true)
     .order('first_name');
 
   if (error) {

@@ -9,6 +9,10 @@ interface Article {
   title: string;
   cover_image_url: string;
   published_at: string;
+  author_id: number;
+  author: {
+    is_visible: boolean;
+  };
 }
 
 interface Topic {
@@ -30,7 +34,11 @@ async function getTopics(): Promise<Topic[]> {
           id,
           title,
           cover_image_url,
-          published_at
+          published_at,
+          author_id,
+          author:author_id (
+            is_visible
+          )
         )
       )
     `)
@@ -41,15 +49,25 @@ async function getTopics(): Promise<Topic[]> {
     return [];
   }
 
-  return topics.map((topic) => ({
-    ...topic,
-    latest_articles: topic.latest_articles
+  return topics.map((topic) => {
+    // Extract articles and filter out those with non-visible authors
+    const articles = topic.latest_articles
       .map((at: { articles: Article }) => at.articles)
+      .filter((article: Article) => {
+        // Handle case where author might be an array or object
+        const author = Array.isArray(article.author) ? article.author[0] : article.author;
+        return author && author.is_visible !== false;
+      })
       .sort((a: Article, b: Article) => 
         new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
       )
-      .slice(0, 3)
-  }));
+      .slice(0, 3);
+    
+    return {
+      ...topic,
+      latest_articles: articles
+    };
+  });
 }
 
 export default async function Topics() {

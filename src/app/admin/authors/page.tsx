@@ -5,7 +5,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
-import { PlusIcon, PencilIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, EyeIcon, EyeSlashIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface Author {
   id: string;
@@ -26,6 +26,9 @@ interface SupabaseError {
 export default function AuthorsAdmin() {
   const [authors, setAuthors] = useState<Author[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authorToDelete, setAuthorToDelete] = useState<Author | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAuthors();
@@ -97,6 +100,37 @@ export default function AuthorsAdmin() {
     } catch (error: unknown) {
       const supabaseError = error as SupabaseError;
       console.error('Error updating author visibility:', supabaseError?.message || 'Unknown error');
+    }
+  }
+
+  async function deleteAuthor(author: Author) {
+    if (author.article_count > 0) {
+      setDeleteError(`Cannot delete ${getAuthorName(author)} because they have ${author.article_count} article${author.article_count > 1 ? 's' : ''}.`);
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError(null);
+    
+    try {
+      const response = await fetch(`/api/admin/authors?id=${author.id}`, {
+        method: 'DELETE',
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete author');
+      }
+      
+      // Remove author from local state
+      setAuthors(authors.filter(a => a.id !== author.id));
+      setAuthorToDelete(null);
+    } catch (error) {
+      console.error('Error deleting author:', error);
+      setDeleteError(error instanceof Error ? error.message : 'An unknown error occurred');
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -192,6 +226,7 @@ export default function AuthorsAdmin() {
                               <Link
                                 href={`/admin/authors/${author.id}/edit`}
                                 className="text-blue-600 hover:text-blue-900"
+                                title="Edit author"
                               >
                                 <PencilIcon className="h-5 w-5" />
                               </Link>
@@ -210,6 +245,13 @@ export default function AuthorsAdmin() {
                                   <EyeIcon className="h-5 w-5" />
                                 )}
                               </button>
+                              <button
+                                onClick={() => setAuthorToDelete(author)}
+                                className="text-red-600 hover:text-red-900"
+                                title="Delete author"
+                              >
+                                <TrashIcon className="h-5 w-5" />
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -222,6 +264,52 @@ export default function AuthorsAdmin() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {authorToDelete && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Delete Author</h3>
+            
+            {deleteError ? (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                {deleteError}
+              </div>
+            ) : (
+              <p className="text-gray-500 mb-4">
+                Are you sure you want to delete {getAuthorName(authorToDelete)}? 
+                {authorToDelete.article_count > 0 && (
+                  <span className="block mt-2 text-red-600">
+                    Warning: This author has {authorToDelete.article_count} article{authorToDelete.article_count > 1 ? 's' : ''}.
+                    You must reassign or delete these articles before deleting this author.
+                  </span>
+                )}
+              </p>
+            )}
+            
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthorToDelete(null);
+                  setDeleteError(null);
+                }}
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => deleteAuthor(authorToDelete)}
+                disabled={isDeleting || authorToDelete.article_count > 0}
+                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
