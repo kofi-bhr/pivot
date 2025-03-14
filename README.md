@@ -2,7 +2,7 @@
 
 Hey there, future political analyst! 👋 This is your friendly guide to our PIVOT codebase. Don't worry if you're not a tech wizard - this README is designed to help you understand what's going on without getting lost in the coding jargon.
 
-## 🏠 What's PIVOT All About?
+## 🏠 Whaft's PIVOT All About?
 
 PIVOT (Policy Insights and Voices of Tomorrow) is a novel non-profit that transforms high school students into published political analysts. Everyone has opinions, so why not make them heard?
 

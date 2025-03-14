@@ -13,7 +13,7 @@ interface SupabaseError {
   code?: string;
 }
 
-export default function EditAuthor({ params }: { params: { id: string } }) {
+export default function EditAuthor({ params }: { params: Promise<{ id: string }> & { id: string } }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
