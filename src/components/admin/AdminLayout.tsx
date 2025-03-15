@@ -7,6 +7,7 @@ const navigation = [
   { name: 'Dashboard', href: '/admin' },
   { name: 'Articles', href: '/admin/articles' },
   { name: 'Authors', href: '/admin/authors' },
+  { name: 'Staff', href: '/admin/staff' },
   { name: 'Comments', href: '/admin/comments' },
 ];
 

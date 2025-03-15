@@ -10,11 +10,13 @@ interface NavLink {
 
 const leftNavigation: NavLink[] = [
   { name: 'Home', href: '/' },
+  { name: 'Articles', href: '/articles' },
   { name: 'Discord', href: 'https://discord.gg/avYcgrJ6pA', external: true },
 ];
 
 const rightNavigation: NavLink[] = [
   { name: 'Authors', href: '/authors' },
+  { name: 'Staff', href: '/staff' },
   { name: 'About', href: '/about' },
 ];
 
@@ -28,8 +30,8 @@ export default function Header() {
         <div className="h-6"></div>
         
         {/* Main navigation */}
-        <div className="flex items-center justify-center py-6">
-          <nav className="hidden md:flex items-center space-x-8">
+        <div className="flex items-center justify-between py-6">
+          <nav className="flex items-center space-x-8">
             {leftNavigation.map((link) => (
               link.external ? (
                 <a
@@ -67,7 +69,7 @@ export default function Header() {
             </div>
           </Link>
           
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="flex items-center space-x-8">
             {rightNavigation.map((link) => (
               <Link
                 key={link.name}
