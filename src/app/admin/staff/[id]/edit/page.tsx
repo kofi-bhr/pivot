@@ -19,7 +19,7 @@ interface StaffMember {
   is_visible: boolean;
 }
 
-export default function EditStaffMember({ params }: { params: { id: string } }) {
+export default function EditStaffMember({ params }: { params: Promise<{ id: string }> & { id: string } }) {
   const router = useRouter();
   const { id } = params;
   
