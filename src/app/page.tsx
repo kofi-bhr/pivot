@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import Image from 'next/image';
 import Layout from '@/components/layout/Layout';
+import Sidebar from '@/components/layout/Sidebar';
 import React from 'react';
 
 interface Author {
@@ -175,12 +176,12 @@ export default async function Home() {
                 <div className="cfr-featured-article">
                   <div className="relative mb-6">
                     {featuredArticle.cover_image_url && (
-                      <div className="relative w-full h-[400px]">
+                      <div className="relative w-full cfr-featured-image-container">
                         <Image 
                           src={featuredArticle.cover_image_url} 
                           alt={featuredArticle.title}
                           fill
-                          className="object-cover cfr-article-image cfr-featured-image"
+                          className="cfr-article-image"
                         />
                       </div>
                     )}
@@ -219,12 +220,12 @@ export default async function Home() {
                   <div key={article.id} className="cfr-article-card">
                     <div className="relative mb-4">
                       {article.cover_image_url && (
-                        <div className="relative w-full h-[200px]">
+                        <div className="relative w-full cfr-secondary-image-container">
                           <Image 
                             src={article.cover_image_url} 
                             alt={article.title}
                             fill
-                            className="object-cover cfr-article-image"
+                            className="cfr-article-image"
                           />
                         </div>
                       )}
@@ -260,12 +261,12 @@ export default async function Home() {
                   <div key={article.id} className="cfr-article-card">
                     <div className="relative mb-4">
                       {article.cover_image_url && (
-                        <div className="relative w-full h-[150px]">
+                        <div className="relative w-full cfr-recent-image-container">
                           <Image 
                             src={article.cover_image_url} 
                             alt={article.title}
                             fill
-                            className="object-cover cfr-article-image"
+                            className="cfr-article-image"
                           />
                         </div>
                       )}
@@ -304,7 +305,7 @@ export default async function Home() {
                           alt={author.name || `${author.first_name} ${author.last_name}`}
                           width={40}
                           height={40}
-                          className="rounded-full object-cover"
+                          className="cfr-author-image"
                         />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
@@ -320,6 +321,9 @@ export default async function Home() {
               </div>
             </section>
           </div>
+          
+          {/* Sidebar Column */}
+          <Sidebar />
         </div>
       </div>
     </Layout>

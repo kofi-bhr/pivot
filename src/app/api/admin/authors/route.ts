@@ -25,18 +25,18 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const { name, image_url, role } = data;
+    const { first_name, last_name, image_url, description } = data;
 
-    if (!name) {
+    if (!first_name || !last_name) {
       return NextResponse.json(
-        { error: 'Name is required' },
+        { error: 'First name and last name are required' },
         { status: 400 }
       );
     }
 
     const { data: author, error } = await supabase
       .from('authors')
-      .insert({ name, image_url, role })
+      .insert({ first_name, last_name, image_url, description })
       .select()
       .single();
 

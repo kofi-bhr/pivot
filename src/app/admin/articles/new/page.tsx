@@ -56,24 +56,26 @@ export default function NewArticle() {
         ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
         : [];
 
-      const { error: insertError } = await supabase
-        .from('articles')
-        .insert({
+      // Use the API endpoint instead of direct Supabase call
+      const response = await fetch('/api/articles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           title: formData.title,
           content: formData.content,
-          summary: formData.summary || null,
-          cover_image_url: formData.coverImage || null,
-          tags: tagsArray,
+          summary: formData.summary,
+          coverImage: formData.coverImage,
+          tags: formData.tags,
           author_id: formData.author_id,
-          is_visible: formData.is_visible,
-          published_at: new Date().toISOString(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .select();
+          is_visible: formData.is_visible
+        }),
+      });
 
-      if (insertError) {
-        throw insertError;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create article');
       }
 
       router.push('/admin/articles');

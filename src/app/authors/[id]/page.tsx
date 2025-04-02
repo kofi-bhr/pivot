@@ -134,19 +134,20 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
     <Layout>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-12">
-          <div className="flex items-center gap-6">
+          {/* Responsive author profile layout - column on mobile, row on desktop */}
+          <div className="flex flex-col md:flex-row md:items-center gap-6">
             {author.image_url && (
-              <div className="relative w-24 h-24">
+              <div className="relative w-40 h-40 md:w-24 md:h-24 mx-auto md:mx-0">
                 <Image
                   src={author.image_url}
                   alt={`${author.first_name} ${author.last_name}`}
-                  width={96}
-                  height={96}
-                  className="rounded-full"
+                  width={160}
+                  height={160}
+                  className="rounded-full cfr-author-image"
                 />
               </div>
             )}
-            <div>
+            <div className="text-center md:text-left mt-4 md:mt-0">
               <h1 className="text-3xl font-bold text-gray-900">
                 {author.first_name} {author.last_name}
               </h1>
@@ -154,7 +155,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
                 <p className="mt-2 text-lg text-gray-600">{author.description}</p>
               )}
               {author.tags && author.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-4">
+                <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-4">
                   {author.tags.map(tag => (
                     <span key={tag} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
                       {tag}
@@ -171,12 +172,12 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
           {articles.map(article => (
             <div key={article.id} className="bg-white rounded-lg shadow-md overflow-hidden">
               {article.cover_image_url && (
-                <div className="relative w-full h-48">
+                <div className="relative w-full cfr-secondary-image-container">
                   <Image 
                     src={article.cover_image_url} 
                     alt={article.title}
                     fill
-                    className="object-cover"
+                    className="cfr-article-image"
                   />
                 </div>
               )}

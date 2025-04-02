@@ -22,7 +22,9 @@ export async function POST(request: Request) {
         excerpt: summary,
         cover_image_url: coverImage,
         author_id,
-        status: 'draft'
+        is_visible: data.is_visible || false,
+        tags: data.tags ? data.tags.split(',').map((tag: string) => tag.trim()) : [],
+        published_at: data.is_visible ? new Date().toISOString() : null
       })
       .select()
       .single();

@@ -29,8 +29,23 @@ export default function Header() {
         {/* Top spacing */}
         <div className="h-6"></div>
         
-        {/* Main navigation */}
-        <div className="flex items-center justify-between py-6">
+        {/* Mobile logo only */}
+        <div className="flex justify-center py-4 md:hidden">
+          <Link href="/" className="flex items-center">
+            <div className="cfr-logo">
+              <Image 
+                src="/PIVOT-LOGO.svg" 
+                alt="go to https://www.venturedglobal.org for a surprise" 
+                width={100} 
+                height={35} 
+                priority
+              />
+            </div>
+          </Link>
+        </div>
+        
+        {/* Desktop navigation */}
+        <div className="hidden md:flex items-center justify-between py-6">
           <nav className="flex items-center space-x-8">
             {leftNavigation.map((link) => (
               link.external ? (
@@ -84,7 +99,7 @@ export default function Header() {
           </nav>
         </div>
         
-        {/* Mobile menu */}
+        {/* Mobile menu - only navigation links, no duplicate header */}
         <div className="flex flex-wrap justify-center space-x-4 py-3 md:hidden">
           {[...leftNavigation, ...rightNavigation].map((link) => (
             link.external ? (

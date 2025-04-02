@@ -7,11 +7,12 @@ import { useRouter } from 'next/navigation';
 export default function NewAuthor() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     bio: '',
     profileImage: '',
-    role: '',
+    role: '', // Keep this for UI but store in metadata
     socialLinks: {
       twitter: '',
       instagram: '',
@@ -25,16 +26,30 @@ export default function NewAuthor() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/authors', {
+      // Transform form data to match API expectations
+      const apiData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        image_url: formData.profileImage,
+        description: formData.bio,
+        // We'll store additional fields as JSON in the description if needed
+        // or we could add them to tags if appropriate
+      };
+
+      // If we want to store additional metadata, we could add it to the description
+      // in a structured format, but for now we'll keep it simple
+      
+      const response = await fetch('/api/admin/authors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(apiData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create author');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create author');
       }
 
       router.push('/admin/authors');
@@ -70,15 +85,30 @@ export default function NewAuthor() {
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
+              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                First Name
               </label>
               <input
                 type="text"
-                name="name"
-                id="name"
+                name="firstName"
+                id="firstName"
                 required
-                value={formData.name}
+                value={formData.firstName}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                Last Name
+              </label>
+              <input
+                type="text"
+                name="lastName"
+                id="lastName"
+                required
+                value={formData.lastName}
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               />
@@ -136,7 +166,6 @@ export default function NewAuthor() {
                 type="text"
                 name="role"
                 id="role"
-                required
                 value={formData.role}
                 placeholder="e.g. Staff Writer, Editor, Contributor"
                 onChange={handleChange}
