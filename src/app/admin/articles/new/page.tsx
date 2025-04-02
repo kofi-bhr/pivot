@@ -12,7 +12,6 @@ export default function NewArticle() {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    summary: '',
     coverImage: '',
     tags: '',
     author_id: '',
@@ -65,9 +64,8 @@ export default function NewArticle() {
         body: JSON.stringify({
           title: formData.title,
           content: formData.content,
-          summary: formData.summary,
           coverImage: formData.coverImage,
-          tags: formData.tags,
+          tags: tagsArray,
           author_id: formData.author_id,
           is_visible: formData.is_visible
         }),
@@ -148,20 +146,6 @@ export default function NewArticle() {
             </div>
 
             <div>
-              <label htmlFor="summary" className="block text-sm font-medium">
-                Summary
-              </label>
-              <textarea
-                name="summary"
-                id="summary"
-                rows={3}
-                value={formData.summary}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
               <label htmlFor="content" className="block text-sm font-medium">
                 Content
               </label>
@@ -200,7 +184,6 @@ export default function NewArticle() {
                 id="tags"
                 value={formData.tags}
                 onChange={handleChange}
-                placeholder="news, feature, opinion"
                 className="mt-1 block w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
@@ -211,26 +194,26 @@ export default function NewArticle() {
                 name="is_visible"
                 id="is_visible"
                 checked={formData.is_visible}
-                onChange={handleChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                onChange={(e) => setFormData(prev => ({ ...prev, is_visible: e.target.checked }))}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              <label htmlFor="is_visible" className="ml-2 block text-sm font-medium">
-                Visible to public
+              <label htmlFor="is_visible" className="ml-2 block text-sm">
+                Publish immediately
               </label>
             </div>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end">
               <button
                 type="button"
-                onClick={() => router.back()}
-                className="px-4 py-2 text-sm border rounded hover:bg-gray-50"
+                onClick={() => router.push('/admin/articles')}
+                className="mr-3 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 text-sm text-white bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
                 {isSubmitting ? 'Creating...' : 'Create Article'}
               </button>

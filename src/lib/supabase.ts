@@ -59,7 +59,6 @@ export type Tag = {
 export type Article = {
   id: string;
   title: string;
-  summary?: string;
   content: string;
   cover_image_url?: string;
   is_visible?: boolean;

@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const { title, content, summary, coverImage, tags: tagString, author_id } = data;
+    const { title, content, coverImage, tags, author_id } = data;
 
     if (!title || !content || !author_id) {
       return NextResponse.json(
@@ -19,11 +19,10 @@ export async function POST(request: Request) {
       .insert({
         title,
         content,
-        excerpt: summary,
         cover_image_url: coverImage,
         author_id,
         is_visible: data.is_visible || false,
-        tags: data.tags ? data.tags.split(',').map((tag: string) => tag.trim()) : [],
+        tags: Array.isArray(tags) ? tags : (data.tags ? data.tags.split(',').map((tag: string) => tag.trim()) : []),
         published_at: data.is_visible ? new Date().toISOString() : null
       })
       .select()
@@ -38,10 +37,10 @@ export async function POST(request: Request) {
     }
 
     // Handle tags if provided
-    if (tagString) {
-      const tags = tagString.split(',').map((tag: string) => tag.trim());
+    if (tags) {
+      const tagArray = Array.isArray(tags) ? tags : tags.split(',').map((tag: string) => tag.trim());
       
-      for (const tagName of tags) {
+      for (const tagName of tagArray) {
         // Get or create tag
         const { data: existingTag, error: tagError } = await supabase
           .from('tags')
