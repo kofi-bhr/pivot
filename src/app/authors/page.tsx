@@ -58,25 +58,26 @@ export default async function Authors() {
               className="block"
             >
               <div className="bg-white p-6 rounded shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <div className="flex items-center mb-4">
+                <div className="flex flex-col items-center mb-6">
                   {author.image_url ? (
-                    <div className="relative w-12 h-12 mr-4">
+                    <div className="relative w-24 h-24 mb-4 overflow-hidden rounded-full">
                       <Image
                         src={author.image_url}
                         alt={`${author.first_name} ${author.last_name}`}
-                        width={48}
-                        height={48}
-                        className="rounded-full object-cover"
+                        fill
+                        sizes="96px"
+                        className="object-cover"
+                        style={{ borderRadius: '50%' }}
                       />
                     </div>
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-gray-200 mr-4 flex items-center justify-center">
-                      <span className="text-gray-500 font-medium">
+                    <div className="w-24 h-24 rounded-full bg-gray-200 mb-4 flex items-center justify-center">
+                      <span className="text-gray-500 text-xl font-medium">
                         {author.first_name.charAt(0)}{author.last_name.charAt(0)}
                       </span>
                     </div>
                   )}
-                  <div>
+                  <div className="text-center">
                     <h2 className="font-medium text-lg">
                       {author.first_name} {author.last_name}
                       <span className="ml-2 text-sm text-gray-500">
@@ -87,7 +88,7 @@ export default async function Authors() {
                 </div>
                 
                 {author.description && (
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 text-center">
                     {truncateText(author.description, 120)}
                   </p>
                 )}

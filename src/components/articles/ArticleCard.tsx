@@ -81,24 +81,39 @@ export default function ArticleCard({ article, featured = false }: ArticleCardPr
           <div className="mt-auto flex items-center gap-x-2">
             <Link href={`/authors/${article.author.id}`} className="flex items-center">
               {article.author.image_url ? (
-                <div className="relative w-8 h-8 overflow-hidden">
+                <div className="relative w-8 h-8 overflow-hidden rounded-full">
                   <Image
                     src={article.author.image_url}
-                    alt={`${article.author.first_name} ${article.author.last_name}`}
+                    alt={`${article.author.first_name || ''} ${article.author.last_name || ''}`}
                     width={32}
                     height={32}
-                    className="object-cover"
+                    className="object-cover rounded-full"
+                    style={{ borderRadius: '50%' }}
+                    onError={(e) => {
+                      // Fallback to initials if image fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      if (target.parentElement) {
+                        target.parentElement.classList.add('bg-gray-200', 'flex', 'items-center', 'justify-center');
+                        const span = document.createElement('span');
+                        span.className = 'text-xs text-gray-500';
+                        const firstName = article.author?.first_name || '';
+                        const lastName = article.author?.last_name || '';
+                        span.innerText = `${firstName.charAt(0)}${lastName.charAt(0)}`;
+                        target.parentElement.appendChild(span);
+                      }
+                    }}
                   />
                 </div>
               ) : (
-                <div className="w-8 h-8 bg-gray-200 flex items-center justify-center">
+                <div className="w-8 h-8 bg-gray-200 flex items-center justify-center rounded-full">
                   <span className="text-xs text-gray-500">
-                    {article.author.first_name.charAt(0)}{article.author.last_name.charAt(0)}
+                    {article.author.first_name?.charAt(0) || ''}{article.author.last_name?.charAt(0) || ''}
                   </span>
                 </div>
               )}
               <span className="ml-2 text-sm text-gray-600 hover:text-gray-900">
-                {article.author.first_name} {article.author.last_name}
+                {article.author.first_name || ''} {article.author.last_name || ''}
               </span>
             </Link>
           </div>
