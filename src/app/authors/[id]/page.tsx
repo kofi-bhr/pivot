@@ -143,7 +143,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
                   alt={`${author.first_name} ${author.last_name}`}
                   width={160}
                   height={160}
-                  className="rounded-full cfr-author-image"
+                  className="object-cover cfr-author-image"
                 />
               </div>
             )}

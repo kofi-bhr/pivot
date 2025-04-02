@@ -296,7 +296,7 @@ export default async function Home() {
                   <Link 
                     key={author.id}
                     href={`/authors/${author.id}`}
-                    className="flex items-center bg-white p-2 rounded-full shadow-sm hover:shadow-md transition-shadow"
+                    className="flex items-center bg-white p-2 hover:shadow-md transition-shadow"
                   >
                     <div className="relative w-10 h-10 mr-2">
                       {author.image_url ? (
@@ -308,7 +308,7 @@ export default async function Home() {
                           className="cfr-author-image"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gray-200 flex items-center justify-center">
                           <span className="text-gray-500 font-medium">
                             {author.first_name.charAt(0)}{author.last_name.charAt(0)}
                           </span>

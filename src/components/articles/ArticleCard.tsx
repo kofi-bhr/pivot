@@ -81,17 +81,17 @@ export default function ArticleCard({ article, featured = false }: ArticleCardPr
           <div className="mt-auto flex items-center gap-x-2">
             <Link href={`/authors/${article.author.id}`} className="flex items-center">
               {article.author.image_url ? (
-                <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                <div className="relative w-8 h-8 overflow-hidden">
                   <Image
                     src={article.author.image_url}
                     alt={`${article.author.first_name} ${article.author.last_name}`}
                     width={32}
                     height={32}
-                    className="rounded-full object-cover"
+                    className="object-cover"
                   />
                 </div>
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                <div className="w-8 h-8 bg-gray-200 flex items-center justify-center">
                   <span className="text-xs text-gray-500">
                     {article.author.first_name.charAt(0)}{article.author.last_name.charAt(0)}
                   </span>
