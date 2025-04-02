@@ -1,68 +1,106 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import ArticleCard from '@/components/articles/ArticleCard';
 import Layout from '@/components/layout/Layout';
 import type { Article, Author } from '@/lib/supabase';
 
-async function getArticles() {
-  console.log('Fetching articles for articles page');
-  
-  // Query the articles table with the correct structure - using the same structure as the homepage
-  const { data, error } = await supabase
-    .from('articles')
-    .select(`
-      id, title, cover_image_url, published_at, content, created_at, updated_at, author_id, tags,
-      author:author_id (
-        id, first_name, last_name, image_url, is_visible
-      )
-    `)
-    .eq('is_visible', true)
-    .not('published_at', 'is', null)
-    .order('published_at', { ascending: false })
-    .limit(12);
+export default function ArticlesPage() {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (error) {
-    console.error('Error fetching articles:', error);
-    return [];
-  }
+  useEffect(() => {
+    // Function to fetch articles
+    async function fetchArticles() {
+      console.log('Fetching articles for articles page');
+      setLoading(true);
+      
+      try {
+        const { data, error } = await supabase
+          .from('articles')
+          .select(`
+            id, title, cover_image_url, published_at, content, created_at, updated_at, author_id, tags,
+            author:author_id (
+              id, first_name, last_name, image_url, is_visible
+            )
+          `)
+          .eq('is_visible', true)
+          .not('published_at', 'is', null)
+          .order('published_at', { ascending: false })
+          .limit(12);
 
-  if (!data || data.length === 0) {
-    console.log('No articles found');
-    return [];
-  }
+        if (error) {
+          console.error('Error fetching articles:', error);
+          return;
+        }
 
-  console.log('Found articles:', data);
+        if (!data || data.length === 0) {
+          console.log('No articles found');
+          setArticles([]);
+          return;
+        }
 
-  // Transform the data to ensure proper typing
-  const articles: Article[] = [];
-  
-  for (const article of data) {
-    // Ensure author is properly structured as a single object, not an array
-    const authorData = Array.isArray(article.author) ? article.author[0] : article.author;
-    
-    // Skip articles with non-visible authors
-    if (authorData && authorData.is_visible === false) {
-      continue;
+        console.log('Found articles:', data);
+
+        // Transform the data to ensure proper typing
+        const formattedArticles: Article[] = [];
+        
+        for (const article of data) {
+          // Ensure author is properly structured as a single object, not an array
+          const authorData = Array.isArray(article.author) ? article.author[0] : article.author;
+          
+          // Skip articles with non-visible authors
+          if (authorData && authorData.is_visible === false) {
+            continue;
+          }
+          
+          formattedArticles.push({
+            id: article.id,
+            title: article.title,
+            cover_image_url: article.cover_image_url || undefined,
+            published_at: article.published_at,
+            content: article.content || '',
+            author_id: article.author_id,
+            created_at: article.created_at,
+            updated_at: article.updated_at,
+            author: authorData as Author,
+            tags: Array.isArray(article.tags) ? article.tags : []
+          });
+        }
+        
+        setArticles(formattedArticles);
+      } catch (error) {
+        console.error('Error in articles fetch:', error);
+      } finally {
+        setLoading(false);
+      }
     }
-    
-    articles.push({
-      id: article.id,
-      title: article.title,
-      cover_image_url: article.cover_image_url || undefined,
-      published_at: article.published_at,
-      content: article.content || '',
-      author_id: article.author_id,
-      created_at: article.created_at,
-      updated_at: article.updated_at,
-      author: authorData as Author,
-      tags: Array.isArray(article.tags) ? article.tags : []
-    });
-  }
-  
-  return articles;
-}
 
-export default async function ArticlesPage() {
-  const articles = await getArticles();
+    // Initial fetch
+    fetchArticles();
+
+    // Set up real-time subscription
+    const subscription = supabase
+      .channel('articles-changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'articles' 
+        }, 
+        () => {
+          console.log('Articles table changed, refetching data');
+          fetchArticles();
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <Layout>
@@ -77,7 +115,19 @@ export default async function ArticlesPage() {
           </div>
         </div>
 
-        {articles.length > 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className="animate-pulse">
+                <div className="h-[225px] w-full bg-gray-200 rounded-lg mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+                <div className="h-4 bg-gray-100 rounded w-full mb-2"></div>
+                <div className="h-4 bg-gray-100 rounded w-2/3"></div>
+              </div>
+            ))}
+          </div>
+        ) : articles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {articles.map((article) => (
               <ArticleCard key={article.id} article={article} />
