@@ -15,7 +15,6 @@ export default function EditArticle({ params }: { params: { id: string } & Promi
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    summary: '',
     coverImage: '',
     tags: '',
     author_id: '',
@@ -60,7 +59,6 @@ export default function EditArticle({ params }: { params: { id: string } & Promi
         setFormData({
           title: article.title || '',
           content: article.content || '',
-          summary: article.summary || '',
           coverImage: article.cover_image_url || '',
           tags: article.tags ? article.tags.join(', ') : '',
           author_id: article.author_id || '',
@@ -99,12 +97,13 @@ export default function EditArticle({ params }: { params: { id: string } & Promi
         .update({
           title: formData.title,
           content: formData.content,
-          summary: formData.summary || null,
           cover_image_url: formData.coverImage || null,
           tags: tagsArray,
           author_id: formData.author_id,
           is_visible: formData.is_visible,
           updated_at: new Date().toISOString(),
+          // If article is being made visible and wasn't before, set published_at
+          published_at: formData.is_visible ? (await getExistingPublishedDate() || new Date().toISOString()) : null,
         })
         .eq('id', id);
 
@@ -119,6 +118,16 @@ export default function EditArticle({ params }: { params: { id: string } & Promi
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const getExistingPublishedDate = async () => {
+    const { data } = await supabase
+      .from('articles')
+      .select('published_at')
+      .eq('id', id)
+      .single();
+    
+    return data?.published_at;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -189,20 +198,6 @@ export default function EditArticle({ params }: { params: { id: string } & Promi
                   </option>
                 ))}
               </select>
-            </div>
-
-            <div>
-              <label htmlFor="summary" className="block text-sm font-medium">
-                Summary
-              </label>
-              <textarea
-                name="summary"
-                id="summary"
-                rows={3}
-                value={formData.summary}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              />
             </div>
 
             <div>
