@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pivot - Empowering Student Entrepreneurs",
-  description: "Pivot helps student entrepreneurs navigate the startup journey with resources, guidance, and community support.",
+  title: "PIVOT - Policy Insights and Voices of Tomorrow",
+  description: "PIVOT transforms high school students into published political analysts, cultivating the next generation of policy insights that cut through polarizing noise with clarity and conviction.",
   icons: {
     icon: [
       { url: "/PIVOT-LETTERMARK@3x.png", type: "image/png" }
@@ -24,15 +24,15 @@ export const metadata: Metadata = {
     ]
   },
   openGraph: {
-    title: "Pivot - Empowering Student Entrepreneurs",
-    description: "Pivot helps student entrepreneurs navigate the startup journey with resources, guidance, and community support.",
+    title: "PIVOT - Policy Insights and Voices of Tomorrow",
+    description: "PIVOT transforms high school students into published political analysts, cultivating the next generation of policy insights that cut through polarizing noise with clarity and conviction.",
     images: [{ url: "/PIVOT-LETTERMARK@3x.png" }],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pivot - Empowering Student Entrepreneurs",
-    description: "Pivot helps student entrepreneurs navigate the startup journey with resources, guidance, and community support.",
+    title: "PIVOT - Policy Insights and Voices of Tomorrow",
+    description: "PIVOT transforms high school students into published political analysts, cultivating the next generation of policy insights that cut through polarizing noise with clarity and conviction.",
     images: [{ url: "/PIVOT-LETTERMARK@3x.png" }],
   },
   manifest: "/manifest.json",
