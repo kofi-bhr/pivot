@@ -134,28 +134,39 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
     <Layout>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-12">
-          {/* Responsive author profile layout - column on mobile, row on desktop */}
-          <div className="flex flex-col md:flex-row md:items-center gap-6">
-            {author.image_url && (
-              <div className="relative w-40 h-40 md:w-24 md:h-24 mx-auto md:mx-0">
-                <Image
-                  src={author.image_url}
-                  alt={`${author.first_name} ${author.last_name}`}
-                  width={160}
-                  height={160}
-                  className="object-cover cfr-author-image"
-                />
+          {/* Author profile with image always on top */}
+          <div className="flex flex-col items-center text-center">
+            {author.image_url ? (
+              <div className="mb-6">
+                <div className="relative w-48 h-48 overflow-hidden rounded-full">
+                  <Image
+                    src={author.image_url}
+                    alt={`${author.first_name} ${author.last_name}`}
+                    width={192}
+                    height={192}
+                    className="object-cover"
+                    style={{ borderRadius: '50%' }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="mb-6">
+                <div className="w-48 h-48 bg-gray-200 rounded-full flex items-center justify-center">
+                  <span className="text-4xl text-gray-500 font-medium">
+                    {author.first_name.charAt(0)}{author.last_name.charAt(0)}
+                  </span>
+                </div>
               </div>
             )}
-            <div className="text-center md:text-left mt-4 md:mt-0">
+            <div className="max-w-2xl">
               <h1 className="text-3xl font-bold text-gray-900">
                 {author.first_name} {author.last_name}
               </h1>
               {author.description && (
-                <p className="mt-2 text-lg text-gray-600">{author.description}</p>
+                <p className="mt-4 text-lg text-gray-600">{author.description}</p>
               )}
               {author.tags && author.tags.length > 0 && (
-                <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-4">
+                <div className="flex flex-wrap justify-center gap-2 mt-6">
                   {author.tags.map(tag => (
                     <span key={tag} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
                       {tag}
