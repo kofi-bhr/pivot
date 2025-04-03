@@ -17,6 +17,7 @@ interface StaffMember {
   linkedin_url: string | null;
   personal_site_url: string | null;
   is_visible: boolean;
+  display_order: number;
 }
 
 export default function EditStaffMember({ params }: { params: Promise<{ id: string }> & { id: string } }) {
@@ -33,7 +34,8 @@ export default function EditStaffMember({ params }: { params: Promise<{ id: stri
     contact_email: '',
     linkedin_url: '',
     personal_site_url: '',
-    is_visible: true
+    is_visible: true,
+    display_order: 9999
   });
   
   const [isLoading, setIsLoading] = useState(true);
@@ -300,6 +302,26 @@ export default function EditStaffMember({ params }: { params: Promise<{ id: stri
               <label htmlFor="is_visible" className="ml-2 block text-sm text-gray-900">
                 Visible on public staff page
               </label>
+            </div>
+
+            <div>
+              <label htmlFor="display_order" className="block text-sm font-medium text-gray-700">
+                Display Order
+              </label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <input
+                  type="number"
+                  name="display_order"
+                  id="display_order"
+                  value={formData.display_order || 9999}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  min="1"
+                />
+              </div>
+              <p className="mt-1 text-sm text-gray-500">
+                Lower numbers will appear first on the staff page. Use the staff list page for drag-and-drop reordering.
+              </p>
             </div>
 
             <div className="flex justify-end gap-3">

@@ -15,7 +15,9 @@ export default function NewStaffMember() {
     bio: '',
     contact_email: '',
     linkedin_url: '',
-    personal_site_url: ''
+    personal_site_url: '',
+    is_visible: true,
+    display_order: 9999
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -48,6 +50,11 @@ export default function NewStaffMember() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: checked }));
   };
 
   return (
@@ -198,6 +205,40 @@ export default function NewStaffMember() {
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
               </div>
+            </div>
+
+            <div className="flex items-center">
+              <input
+                id="is_visible"
+                name="is_visible"
+                type="checkbox"
+                checked={formData.is_visible}
+                onChange={handleCheckboxChange}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="is_visible" className="ml-2 block text-sm text-gray-900">
+                Visible on public staff page
+              </label>
+            </div>
+
+            <div>
+              <label htmlFor="display_order" className="block text-sm font-medium text-gray-700">
+                Display Order
+              </label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <input
+                  type="number"
+                  name="display_order"
+                  id="display_order"
+                  value={formData.display_order}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  min="1"
+                />
+              </div>
+              <p className="mt-1 text-sm text-gray-500">
+                Lower numbers will appear first on the staff page. Use the staff list page for drag-and-drop reordering.
+              </p>
             </div>
 
             <div className="flex justify-end gap-3">

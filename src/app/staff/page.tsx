@@ -18,6 +18,7 @@ interface StaffMember {
   contact_email: string | null;
   linkedin_url: string | null;
   personal_site_url: string | null;
+  display_order: number;
 }
 
 export default function StaffPage() {
@@ -27,6 +28,25 @@ export default function StaffPage() {
   useEffect(() => {
     async function fetchStaffMembers() {
       try {
+        // Try to order by display_order first
+        let query = supabase
+          .from('staff')
+          .select('*')
+          .eq('is_visible', true);
+          
+        try {
+          const { data, error } = await query.order('display_order', { ascending: true });
+          
+          if (!error) {
+            setStaffMembers(data || []);
+            setLoading(false);
+            return;
+          }
+        } catch (orderError) {
+          console.error('Error ordering by display_order, falling back to last_name:', orderError);
+        }
+        
+        // Fallback to ordering by last_name
         const { data, error } = await supabase
           .from('staff')
           .select('*')

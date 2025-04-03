@@ -1,8 +1,12 @@
+'use client';
+
 import { supabase } from '@/lib/supabase';
 import Layout from '@/components/layout/Layout';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 
 interface Author {
   id: string;
@@ -114,20 +118,86 @@ async function getAuthorArticles(authorId: string): Promise<Article[]> {
   }));
 }
 
-export default async function AuthorPage({ params }: { params: Promise<{ id: string }> }) {
-  // Wait for params to be available, then use the ID directly as a string
-  const { id } = await params;
+export default function AuthorPage() {
+  const params = useParams();
+  const authorId = params.id as string;
   
-  // No need to convert to number since we're using UUID strings
-  const authorId = id;
+  const [author, setAuthor] = useState<Author | null>(null);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notFoundError, setNotFoundError] = useState(false);
 
-  const [author, articles] = await Promise.all([
-    getAuthor(authorId),
-    getAuthorArticles(authorId)
-  ]);
+  useEffect(() => {
+    async function loadAuthorData() {
+      try {
+        const [authorData, articlesData] = await Promise.all([
+          getAuthor(authorId),
+          getAuthorArticles(authorId)
+        ]);
+
+        if (!authorData) {
+          setNotFoundError(true);
+          return;
+        }
+
+        setAuthor(authorData);
+        setArticles(articlesData);
+      } catch (error) {
+        console.error('Error loading author data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (authorId) {
+      loadAuthorData();
+    }
+  }, [authorId]);
+
+  if (notFoundError) {
+    notFound();
+  }
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+          <div className="mb-12 animate-pulse">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-6">
+                <div className="w-48 h-48 bg-gray-200 rounded-full"></div>
+              </div>
+              <div className="max-w-2xl">
+                <div className="h-8 bg-gray-200 w-64 mx-auto mb-4"></div>
+                <div className="h-4 bg-gray-100 w-full mx-auto mb-2"></div>
+                <div className="h-4 bg-gray-100 w-full mx-auto mb-2"></div>
+                <div className="h-4 bg-gray-100 w-3/4 mx-auto"></div>
+              </div>
+            </div>
+          </div>
+
+          <div className="h-8 bg-gray-200 w-48 mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...Array(3)].map((_, index) => (
+              <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="h-48 bg-gray-200"></div>
+                <div className="p-4">
+                  <div className="h-6 bg-gray-200 w-3/4 mb-2"></div>
+                  <div className="flex flex-wrap gap-2">
+                    <div className="h-4 bg-gray-100 w-16 rounded"></div>
+                    <div className="h-4 bg-gray-100 w-20 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!author) {
-    notFound();
+    return null;
   }
 
   return (
@@ -180,32 +250,38 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
 
         <h2 className="text-2xl font-bold mb-6">Articles</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {articles.map(article => (
-            <div key={article.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-              {article.cover_image_url && (
-                <div className="relative w-full cfr-secondary-image-container">
-                  <Image 
-                    src={article.cover_image_url} 
-                    alt={article.title}
-                    fill
-                    className="cfr-article-image"
-                  />
-                </div>
-              )}
-              <div className="p-4">
-                <Link href={`/articles/${article.id}`} className="hover:text-blue-600 transition-colors">
-                  <h3 className="text-xl font-semibold mb-2">{article.title}</h3>
-                </Link>
-                <div className="flex flex-wrap gap-2">
-                  {article.tags.map(tag => (
-                    <span key={tag} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm">
-                      {tag}
-                    </span>
-                  ))}
+          {articles.length > 0 ? (
+            articles.map(article => (
+              <div key={article.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                {article.cover_image_url && (
+                  <div className="relative w-full cfr-secondary-image-container">
+                    <Image 
+                      src={article.cover_image_url} 
+                      alt={article.title}
+                      fill
+                      className="cfr-article-image"
+                    />
+                  </div>
+                )}
+                <div className="p-4">
+                  <Link href={`/articles/${article.id}`} className="hover:text-blue-600 transition-colors">
+                    <h3 className="text-xl font-semibold mb-2">{article.title}</h3>
+                  </Link>
+                  <div className="flex flex-wrap gap-2">
+                    {article.tags.map(tag => (
+                      <span key={tag} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
+            ))
+          ) : (
+            <div className="col-span-3 text-center py-8">
+              <p className="text-gray-500">No articles found for this author.</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </Layout>
