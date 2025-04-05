@@ -11,7 +11,7 @@ interface NavLink {
 const leftNavigation: NavLink[] = [
   { name: 'Home', href: '/' },
   { name: 'Articles', href: '/articles' },
-  { name: 'Discord', href: 'https://discord.gg/avYcgrJ6pA', external: true },
+  { name: 'Sign Up', href: 'https://forms.gle/VHDtEzJgNPLGNZiL9', external: true },
 ];
 
 const rightNavigation: NavLink[] = [
