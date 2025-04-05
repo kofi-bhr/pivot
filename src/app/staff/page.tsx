@@ -29,7 +29,7 @@ export default function StaffPage() {
     async function fetchStaffMembers() {
       try {
         // Try to order by display_order first
-        let query = supabase
+        const query = supabase
           .from('staff')
           .select('*')
           .eq('is_visible', true);

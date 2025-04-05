@@ -135,7 +135,7 @@ export default function StaffAdmin() {
   async function fetchStaffMembers() {
     try {
       // Try to order by display_order first
-      let staffQuery = supabase
+      const staffQuery = supabase
         .from('staff')
         .select(`
           id,

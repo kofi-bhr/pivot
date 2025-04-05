@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 export async function GET() {
   try {
     // Try to get authors ordered by display_order first
-    let authorsQuery = supabase
+    const authorsQuery = supabase
       .from('authors')
       .select('*');
     

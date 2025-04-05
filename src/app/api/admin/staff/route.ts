@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 export async function GET() {
   try {
     // Try to get staff ordered by display_order first
-    let staffQuery = supabase
+    const staffQuery = supabase
       .from('staff')
       .select('*');
     

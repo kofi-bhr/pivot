@@ -22,6 +22,7 @@ export default function EditAuthor({ params }: { params: Promise<{ id: string }>
     description: '',
     image_url: '',
     is_visible: true,
+    display_order: 9999,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,6 +44,7 @@ export default function EditAuthor({ params }: { params: Promise<{ id: string }>
             description: data.description || '',
             image_url: data.image_url || '',
             is_visible: data.is_visible !== undefined ? data.is_visible : true,
+            display_order: data.display_order || 9999,
           });
         }
       } catch (error: unknown) {
@@ -70,6 +72,7 @@ export default function EditAuthor({ params }: { params: Promise<{ id: string }>
           description: formData.description,
           image_url: formData.image_url,
           is_visible: formData.is_visible,
+          display_order: formData.display_order,
           updated_at: new Date().toISOString(),
         })
         .eq('id', params.id);
@@ -183,6 +186,26 @@ export default function EditAuthor({ params }: { params: Promise<{ id: string }>
               <label htmlFor="is_visible" className="ml-2 block text-sm text-gray-900">
                 Visible to public
               </label>
+            </div>
+
+            <div>
+              <label htmlFor="display_order" className="block text-sm font-medium text-gray-700">
+                Display Order
+              </label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <input
+                  type="number"
+                  name="display_order"
+                  id="display_order"
+                  value={formData.display_order}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  min="1"
+                />
+              </div>
+              <p className="mt-1 text-sm text-gray-500">
+                Lower numbers will appear first on the authors page. Use the authors list page for drag-and-drop reordering.
+              </p>
             </div>
 
             <div className="flex justify-end gap-3">

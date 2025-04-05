@@ -26,7 +26,7 @@ function truncateText(text: string | null | undefined, maxLength: number = 150):
 async function getAuthors(): Promise<Author[]> {
   try {
     // Try to order by display_order first
-    let query = supabase
+    const query = supabase
       .from('authors')
       .select(`
         id,

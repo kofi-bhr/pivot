@@ -7,12 +7,15 @@ import { useRouter } from 'next/navigation';
 export default function NewAuthor() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    first_name: '',
+    last_name: '',
+    description: '',
+    image_url: '',
+    is_visible: true,
+    display_order: 9999,
+    // Additional fields for UI that will be transformed
     email: '',
-    bio: '',
-    profileImage: '',
-    role: '', // Keep this for UI but store in metadata
+    role: '',
     socialLinks: {
       twitter: '',
       instagram: '',
@@ -28,16 +31,14 @@ export default function NewAuthor() {
     try {
       // Transform form data to match API expectations
       const apiData = {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        image_url: formData.profileImage,
-        description: formData.bio,
-        // We'll store additional fields as JSON in the description if needed
-        // or we could add them to tags if appropriate
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        image_url: formData.image_url,
+        description: formData.description,
+        is_visible: formData.is_visible,
+        display_order: formData.display_order,
+        // We could add additional metadata as JSON if needed
       };
-
-      // If we want to store additional metadata, we could add it to the description
-      // in a structured format, but for now we'll keep it simple
       
       const response = await fetch('/api/admin/authors', {
         method: 'POST',
@@ -62,7 +63,8 @@ export default function NewAuthor() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target as HTMLInputElement;
+    
     if (name.startsWith('social_')) {
       const social = name.replace('social_', '');
       setFormData(prev => ({
@@ -72,6 +74,9 @@ export default function NewAuthor() {
           [social]: value
         }
       }));
+    } else if (type === 'checkbox') {
+      const target = e.target as HTMLInputElement;
+      setFormData(prev => ({ ...prev, [name]: target.checked }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -85,30 +90,30 @@ export default function NewAuthor() {
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">
                 First Name
               </label>
               <input
                 type="text"
-                name="firstName"
-                id="firstName"
+                name="first_name"
+                id="first_name"
                 required
-                value={formData.firstName}
+                value={formData.first_name}
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               />
             </div>
 
             <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">
                 Last Name
               </label>
               <input
                 type="text"
-                name="lastName"
-                id="lastName"
+                name="last_name"
+                id="last_name"
                 required
-                value={formData.lastName}
+                value={formData.last_name}
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               />
@@ -122,37 +127,38 @@ export default function NewAuthor() {
                 type="email"
                 name="email"
                 id="email"
-                required
                 value={formData.email}
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               />
+              <p className="mt-1 text-xs text-gray-500">
+                Email is for admin reference only and not displayed publicly.
+              </p>
             </div>
 
             <div>
-              <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                 Biography
               </label>
               <textarea
-                name="bio"
-                id="bio"
+                name="description"
+                id="description"
                 rows={4}
-                required
-                value={formData.bio}
+                value={formData.description}
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               />
             </div>
 
             <div>
-              <label htmlFor="profileImage" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="image_url" className="block text-sm font-medium text-gray-700">
                 Profile Image URL
               </label>
               <input
                 type="url"
-                name="profileImage"
-                id="profileImage"
-                value={formData.profileImage}
+                name="image_url"
+                id="image_url"
+                value={formData.image_url}
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               />
@@ -171,6 +177,9 @@ export default function NewAuthor() {
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               />
+              <p className="mt-1 text-xs text-gray-500">
+                Role is for admin reference only.
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -220,6 +229,40 @@ export default function NewAuthor() {
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
               </div>
+            </div>
+
+            <div className="flex items-center mt-4">
+              <input
+                type="checkbox"
+                name="is_visible"
+                id="is_visible"
+                checked={formData.is_visible}
+                onChange={handleChange}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="is_visible" className="ml-2 block text-sm text-gray-900">
+                Visible to public
+              </label>
+            </div>
+
+            <div>
+              <label htmlFor="display_order" className="block text-sm font-medium text-gray-700">
+                Display Order
+              </label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <input
+                  type="number"
+                  name="display_order"
+                  id="display_order"
+                  value={formData.display_order}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  min="1"
+                />
+              </div>
+              <p className="mt-1 text-sm text-gray-500">
+                Lower numbers will appear first on the authors page. Use the authors list page for drag-and-drop reordering.
+              </p>
             </div>
 
             <div className="flex justify-end gap-3">
