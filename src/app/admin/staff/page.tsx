@@ -327,7 +327,7 @@ export default function StaffAdmin() {
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-yellow-800">Order has been changed</h3>
                 <div className="mt-2 text-sm text-yellow-700">
-                  <p>You've changed the order of staff members. Click Save Order to apply these changes.</p>
+                  <p>You&apos;ve changed the order of staff members. Click Save Order to apply these changes.</p>
                 </div>
                 <div className="mt-4">
                   <div className="-mx-2 -my-1.5 flex">
