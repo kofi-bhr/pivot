@@ -156,13 +156,20 @@ export default function ArticlesAdmin() {
                     ) : (
                       articles.map((article) => (
                         <tr key={article.id}>
-                          <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                            {article.title}
+                          <td className="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                            <Link 
+                              href={`/articles/${article.id}`}
+                              className="hover:text-blue-600 transition-colors"
+                            >
+                              <div className="max-w-xs truncate">
+                                {article.title}
+                              </div>
+                            </Link>
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className="px-3 py-4 text-sm text-gray-500">
                             {article.author ? getAuthorName(article.author) : 'Unknown'}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className="px-3 py-4 text-sm text-gray-500">
                             <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
                               getArticleStatus(article) === 'published' ? 'bg-green-100 text-green-800' : 
                               getArticleStatus(article) === 'draft' ? 'bg-yellow-100 text-yellow-800' :
@@ -171,10 +178,10 @@ export default function ArticlesAdmin() {
                               {getArticleStatus(article)}
                             </span>
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className="px-3 py-4 text-sm text-gray-500">
                             {article.published_at ? format(new Date(article.published_at), 'MMM d, yyyy') : 'Not published'}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className="px-3 py-4 text-sm text-gray-500">
                             <div className="flex flex-wrap gap-1">
                               {article.tags && article.tags.map(tag => (
                                 <span key={tag} className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">
@@ -183,7 +190,7 @@ export default function ArticlesAdmin() {
                               ))}
                             </div>
                           </td>
-                          <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                          <td className="relative py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                             <div className="flex justify-end gap-2">
                               <Link
                                 href={`/admin/articles/${article.id}/edit`}

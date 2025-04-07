@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { generateKofiComment } from '@/lib/easterEggs';
 
@@ -23,6 +23,10 @@ export default function CommentSection({ articleId, initialComments }: CommentSe
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const getEasterEggRef = useCallback((commentId: string) => {
+    const easterEggRef = document.querySelector(`#easter-egg-${commentId}`);
+    return easterEggRef;
+  }, []);
 
   // Add Kofi's easter egg comment if chance hits
   useEffect(() => {
@@ -35,6 +39,41 @@ export default function CommentSection({ articleId, initialComments }: CommentSe
       setComments(newComments);
     }
   }, [articleId, comments]);
+
+  // Set up intersection observer for easter egg comments
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    
+    // Create a new observer for each easter egg comment
+    comments.forEach(comment => {
+      if (comment.is_easter_egg) {
+        const element = getEasterEggRef(String(comment.id));
+        if (element) {
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                // When easter egg comment is visible, set timeout to remove it after 3 seconds
+                setTimeout(() => {
+                  setComments(prev => prev.filter(c => c.id !== comment.id));
+                }, 3000);
+                
+                // Disconnect observer after triggering
+                observer.disconnect();
+              }
+            });
+          });
+          
+          observer.observe(element);
+          observers.push(observer);
+        }
+      }
+    });
+    
+    // Cleanup observers on unmount
+    return () => {
+      observers.forEach(observer => observer.disconnect());
+    };
+  }, [comments, getEasterEggRef]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,7 +152,7 @@ export default function CommentSection({ articleId, initialComments }: CommentSe
       {comments.length > 0 ? (
         <div className="space-y-8">
           {comments.map(comment => (
-            <div key={comment.id} className="border-b border-gray-100 pb-6 last:border-0">
+            <div key={comment.id} id={`easter-egg-${comment.id}`} className="border-b border-gray-100 pb-6 last:border-0">
               <div className="flex justify-between items-start mb-3">
                 <h3 className={`font-medium text-gray-900 text-lg ${comment.is_easter_egg ? 'text-blue-600' : ''}`}>
                   {comment.commenter_name}

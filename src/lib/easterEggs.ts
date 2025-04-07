@@ -20,20 +20,20 @@ export const addConsoleEasterEggs = (): void => {
   // Add a hidden console message that appears when someone opens dev tools
   console.log(
     '%c👋 Hello curious developer!',
-    'font-size: 20px; font-weight: bold; color: #293A4A;'
+    'font-size: 20px; font-weight: bold; color:rgb(128, 0, 255);'
   );
   
   setTimeout(() => {
     console.log(
       '%cPsst... Did you know this site was created by high schooler Kofi Hair-Ralston?',
-      'font-size: 14px; color: #293A4A;'
+      'font-size: 14px; color:rgb(128, 0, 255);'
     );
   }, 1000);
   
   setTimeout(() => {
     console.log(
       `%cCheck out his nonprofit VenturEd connecting high schoolers to startup internships: ${VENTURED_URL}`,
-      'font-size: 14px; color: #293A4A; text-decoration: underline;'
+      'font-size: 14px; color:rgb(128, 0, 255); text-decoration: underline;'
     );
   }, 2000);
 };
@@ -48,15 +48,15 @@ export const initTitleChangeEasterEgg = (): () => void => {
   
   const intervalId = setInterval(() => {
     // 1% chance every second to change the title
-    if (shouldShowEasterEgg(0.01) && !isChanging) {
+    if (shouldShowEasterEgg(0.005) && !isChanging) {
       isChanging = true;
-      document.title = "✨ GO TO VENTUREDGLOBAL.ORG ✨";
+      document.title = "✨ VENTUREDGLOBAL.ORG ✨";
       
-      // Change back after 3 seconds
+      // Change back after 2 seconds
       setTimeout(() => {
         document.title = originalTitle;
         isChanging = false;
-      }, 3000);
+      }, 2000);
     }
   }, 1000);
   
@@ -66,8 +66,8 @@ export const initTitleChangeEasterEgg = (): () => void => {
 
 // Generate a Kofi comment for articles
 export const generateKofiComment = (articleId: number | string) => {
-  // Only show this easter egg 5% of the time
-  if (!shouldShowEasterEgg(0.05)) return null;
+  // Only show this easter egg 1% of the time (reduced from 5%)
+  if (!shouldShowEasterEgg(0.01)) return null;
   
   const comments = [
     `That's pretty cool, but you know what else is cool? Free high school startup internships! Check out ${VENTURED_URL}`,
