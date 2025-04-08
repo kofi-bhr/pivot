@@ -31,7 +31,7 @@ export default function Header() {
         
         {/* Mobile logo only */}
         <div className="flex justify-center py-4 md:hidden">
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex flex-col items-center">
             <div className="cfr-logo">
               <Image 
                 src="/PIVOT-LOGO.svg" 
@@ -41,6 +41,7 @@ export default function Header() {
                 priority
               />
             </div>
+            <p className="text-xs italic text-gray-500 mt-1">"When the world turns, we lead"</p>
           </Link>
         </div>
         
@@ -72,7 +73,7 @@ export default function Header() {
             ))}
           </nav>
           
-          <Link href="/" className="flex items-center mx-12">
+          <Link href="/" className="flex flex-col items-center mx-12">
             <div className="cfr-logo">
               <Image 
                 src="/PIVOT-LOGO.svg" 
@@ -82,6 +83,7 @@ export default function Header() {
                 priority
               />
             </div>
+            <p className="text-xs italic text-gray-500 mt-1">"When the world turns, we lead"</p>
           </Link>
           
           <nav className="flex items-center space-x-8">
