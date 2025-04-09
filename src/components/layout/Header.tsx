@@ -41,7 +41,7 @@ export default function Header() {
                 priority
               />
             </div>
-            <p className="text-xs italic text-gray-500 mt-1">"When the world turns, we lead"</p>
+            <p className="text-xs italic text-gray-500 mt-1">&ldquo;When the world turns, we lead&rdquo;</p>
           </Link>
         </div>
         
@@ -83,7 +83,7 @@ export default function Header() {
                 priority
               />
             </div>
-            <p className="text-xs italic text-gray-500 mt-1">"When the world turns, we lead"</p>
+            <p className="text-xs italic text-gray-500 mt-1">&ldquo;When the world turns, we lead&rdquo;</p>
           </Link>
           
           <nav className="flex items-center space-x-8">
