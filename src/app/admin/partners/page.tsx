@@ -83,9 +83,11 @@ export default function PartnersAdmin() {
     }
   };
 
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     void fetchPartners();
   }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
