@@ -19,7 +19,7 @@ export default function PartnersPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    async function fetchPartners() {
+    const fetchPartners = async () => {
       try {
         const { data } = await supabase
           .from('partners')
@@ -32,10 +32,10 @@ export default function PartnersPage() {
       } finally {
         setIsLoading(false);
       }
-    }
+    };
 
-    fetchPartners();
-  }, []);
+    void fetchPartners();
+  }, [supabase]);
 
   if (isLoading) {
     return (

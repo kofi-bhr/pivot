@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { createClient } from '@/utils/supabase/client';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -55,7 +54,6 @@ function SortablePartnerRow({ partner, onDelete }: { partner: Partner; onDelete:
 }
 
 export default function PartnersAdmin() {
-  const router = useRouter();
   const [partners, setPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,12 +68,12 @@ export default function PartnersAdmin() {
 
   const fetchPartners = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('partners')
         .select('*')
         .order('order', { ascending: true });
 
-      if (error) throw error;
+      if (fetchError) throw fetchError;
       setPartners(data || []);
     } catch (err) {
       console.error('Error fetching partners:', err);
@@ -86,13 +84,13 @@ export default function PartnersAdmin() {
   };
 
   useEffect(() => {
-    fetchPartners();
+    void fetchPartners();
   }, []);
 
-  const handleDragEnd = async (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (active.id !== over.id) {
+    if (active.id !== over?.id && over) {
       setPartners((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
@@ -106,7 +104,7 @@ export default function PartnersAdmin() {
         }));
 
         // Save new order to database
-        saveOrder(updatedItems);
+        void saveOrder(updatedItems);
 
         return updatedItems;
       });
@@ -120,11 +118,11 @@ export default function PartnersAdmin() {
         order: partner.order
       }));
 
-      const { error } = await supabase
+      const { error: updateError } = await supabase
         .from('partners')
         .upsert(updates);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
     } catch (err) {
       console.error('Error saving order:', err);
       setError('Failed to save partner order');
@@ -135,12 +133,12 @@ export default function PartnersAdmin() {
     if (!confirm('Are you sure you want to delete this partner?')) return;
 
     try {
-      const { error } = await supabase
+      const { error: deleteError } = await supabase
         .from('partners')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (deleteError) throw deleteError;
 
       setPartners(partners.filter(partner => partner.id !== id));
     } catch (err) {
