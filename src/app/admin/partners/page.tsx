@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { createClient } from '@/utils/supabase/client';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface Partner {
   id: string;
@@ -17,7 +19,135 @@ interface Partner {
   order: number;
 }
 
-function SortablePartnerRow({ partner, onDelete }: { partner: Partner; onDelete: (id: string) => void }) {
+interface EditPartnerModalProps {
+  partner: Partner | null;
+  onClose: () => void;
+  onSave: (partner: Partner) => Promise<void>;
+}
+
+function EditPartnerModal({ partner, onClose, onSave }: EditPartnerModalProps) {
+  const [name, setName] = useState(partner?.name || '');
+  const [websiteUrl, setWebsiteUrl] = useState(partner?.website_url || '');
+  const [logoUrl, setLogoUrl] = useState(partner?.logo_url || '');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!partner) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await onSave({
+        ...partner,
+        name,
+        website_url: websiteUrl,
+        logo_url: logoUrl,
+      });
+      onClose();
+    } catch (err) {
+      setError('Failed to update partner');
+      console.error('Error updating partner:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!partner) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+
+        <div className="inline-block transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 sm:align-middle">
+          <div>
+            <div className="mt-3 text-center sm:mt-5">
+              <h3 className="text-lg font-medium leading-6 text-gray-900">Edit Partner</h3>
+              <div className="mt-2">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="website" className="block text-sm font-medium text-gray-700">
+                      Website URL
+                    </label>
+                    <input
+                      type="url"
+                      name="website"
+                      id="website"
+                      value={websiteUrl}
+                      onChange={(e) => setWebsiteUrl(e.target.value)}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="logo" className="block text-sm font-medium text-gray-700">
+                      Logo URL
+                    </label>
+                    <input
+                      type="url"
+                      name="logo"
+                      id="logo"
+                      value={logoUrl}
+                      onChange={(e) => setLogoUrl(e.target.value)}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                      required
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="rounded-md bg-red-50 p-4">
+                      <div className="text-sm text-red-700">{error}</div>
+                    </div>
+                  )}
+
+                  <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:col-start-2 sm:text-sm disabled:opacity-50"
+                    >
+                      {isLoading ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:col-start-1 sm:mt-0 sm:text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SortablePartnerRow({ partner, onDelete, onEdit }: { partner: Partner; onDelete: (id: string) => void; onEdit: (partner: Partner) => void }) {
   const {
     attributes,
     listeners,
@@ -31,23 +161,53 @@ function SortablePartnerRow({ partner, onDelete }: { partner: Partner; onDelete:
     transition,
   };
 
+  const truncateUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.hostname;
+    } catch {
+      return url.length > 30 ? `${url.substring(0, 30)}...` : url;
+    }
+  };
+
   return (
     <tr ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-        {partner.name}
+      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+        <div className="flex items-center">
+          <div className="h-10 w-10 flex-shrink-0">
+            <Image
+              src={partner.logo_url}
+              alt={partner.name}
+              width={40}
+              height={40}
+              className="rounded-full"
+            />
+          </div>
+          <div className="ml-4">
+            <div className="font-medium text-gray-900">{partner.name}</div>
+          </div>
+        </div>
       </td>
       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
         <a href={partner.website_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-900">
-          {partner.website_url}
+          {truncateUrl(partner.website_url)}
         </a>
       </td>
       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-        <button
-          onClick={() => onDelete(partner.id)}
-          className="text-red-600 hover:text-red-900"
-        >
-          Delete
-        </button>
+        <div className="flex justify-end space-x-2">
+          <button
+            onClick={() => onEdit(partner)}
+            className="text-blue-600 hover:text-blue-900"
+          >
+            <PencilIcon className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => onDelete(partner.id)}
+            className="text-red-600 hover:text-red-900"
+          >
+            <TrashIcon className="h-5 w-5" />
+          </button>
+        </div>
       </td>
     </tr>
   );
@@ -57,6 +217,7 @@ export default function PartnersAdmin() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
   const supabase = createClient();
 
   const sensors = useSensors(
@@ -83,11 +244,9 @@ export default function PartnersAdmin() {
     }
   };
 
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     void fetchPartners();
   }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -99,13 +258,11 @@ export default function PartnersAdmin() {
 
         const newItems = arrayMove(items, oldIndex, newIndex);
         
-        // Update order values
         const updatedItems = newItems.map((item, index) => ({
           ...item,
           order: index + 1
         }));
 
-        // Save new order to database
         void saveOrder(updatedItems);
 
         return updatedItems;
@@ -146,6 +303,26 @@ export default function PartnersAdmin() {
     } catch (err) {
       console.error('Error deleting partner:', err);
       setError('Failed to delete partner');
+    }
+  };
+
+  const handleEdit = async (partner: Partner) => {
+    try {
+      const { error: updateError } = await supabase
+        .from('partners')
+        .update({
+          name: partner.name,
+          website_url: partner.website_url,
+          logo_url: partner.logo_url,
+        })
+        .eq('id', partner.id);
+
+      if (updateError) throw updateError;
+
+      setPartners(partners.map(p => p.id === partner.id ? partner : p));
+    } catch (err) {
+      console.error('Error updating partner:', err);
+      setError('Failed to update partner');
     }
   };
 
@@ -213,7 +390,7 @@ export default function PartnersAdmin() {
                     <thead className="bg-gray-50">
                       <tr>
                         <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                          Name
+                          Partner
                         </th>
                         <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                           Website
@@ -233,6 +410,7 @@ export default function PartnersAdmin() {
                             key={partner.id}
                             partner={partner}
                             onDelete={handleDelete}
+                            onEdit={setEditingPartner}
                           />
                         ))}
                       </SortableContext>
@@ -244,6 +422,14 @@ export default function PartnersAdmin() {
           </div>
         </div>
       </div>
+
+      {editingPartner && (
+        <EditPartnerModal
+          partner={editingPartner}
+          onClose={() => setEditingPartner(null)}
+          onSave={handleEdit}
+        />
+      )}
     </AdminLayout>
   );
 } 
