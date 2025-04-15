@@ -9,7 +9,6 @@ interface NavLink {
 }
 
 const leftNavigation: NavLink[] = [
-  { name: 'Home', href: '/' },
   { name: 'Articles', href: '/articles' },
   { name: 'Partners', href: '/partners' },
   { name: 'Join', href: 'https://forms.gle/VHDtEzJgNPLGNZiL9', external: true },
