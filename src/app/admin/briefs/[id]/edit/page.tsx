@@ -1,7 +1,6 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
-import BriefForm from "../../_components/BriefForm";
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import BriefForm from '../../_components/BriefForm';
 
 interface EditBriefPageProps {
   params: {
@@ -10,27 +9,28 @@ interface EditBriefPageProps {
 }
 
 export default async function EditBriefPage({ params }: EditBriefPageProps) {
-  const supabase = createServerComponentClient({ cookies });
+  const cookieStore = cookies();
+  const supabase = createServerComponentClient({ cookies: () => cookieStore });
 
   const [{ data: brief }, { data: authors }] = await Promise.all([
     supabase
-      .from("briefs")
+      .from('briefs')
       .select()
-      .eq("id", params.id)
+      .eq('id', params.id)
       .single(),
     supabase
-      .from("authors")
-      .select("id, first_name, last_name")
-      .order("display_order"),
+      .from('authors')
+      .select('id, first_name, last_name')
+      .order('display_order')
   ]);
 
   if (!brief) {
-    notFound();
+    throw new Error('Brief not found');
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Edit Policy Brief</h1>
+    <div>
+      <h1 className="text-2xl font-bold mb-6">Edit Brief</h1>
       <BriefForm brief={brief} authors={authors || []} />
     </div>
   );
