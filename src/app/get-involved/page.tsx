@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Image from 'next/image';
 import Layout from '@/components/layout/Layout';
 
 export default function GetInvolvedPage() {
@@ -95,8 +95,8 @@ export default function GetInvolvedPage() {
           <section>
             <div className="bg-white rounded-lg p-8 shadow-md text-center">
               <h2 className="text-3xl font-bold mb-4">Have More Questions?</h2>
-              <p className="text-gray-600 mb-6">
-                We're here to help! Reach out to our team for more information about our programs.
+              <p className="text-gray-600 mb-4">
+                Let&apos;s shape the future of policy together. Join our community of passionate writers and analysts making a difference.
               </p>
               <a
                 href="mailto:contact@pivot.org"

@@ -245,8 +245,8 @@ export default function PartnersAdmin() {
   };
 
   useEffect(() => {
-    void fetchPartners();
-  }, []);
+    fetchPartners();
+  }, [fetchPartners]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
