@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import AdminLayout from '@/components/admin/AdminLayout';
@@ -227,22 +227,28 @@ export default function PartnersAdmin() {
     })
   );
 
-  const fetchPartners = async () => {
+  const fetchPartners = useCallback(async () => {
     try {
-      const { data, error: fetchError } = await supabase
+      const { data, error } = await supabase
         .from('partners')
         .select('*')
         .order('order', { ascending: true });
 
-      if (fetchError) throw fetchError;
+      if (error) {
+        console.error('Error fetching partners:', error);
+        setError(error.message);
+        return;
+      }
+
       setPartners(data || []);
+      setError(null);
     } catch (err) {
-      console.error('Error fetching partners:', err);
-      setError('Failed to load partners');
+      console.error('Error:', err);
+      setError('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [supabase]);
 
   useEffect(() => {
     fetchPartners();
