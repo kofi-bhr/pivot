@@ -15,10 +15,10 @@ interface Comment {
 
 interface CommentSectionProps {
   articleId: number | string;
-  initialComments: Comment[];
+  initialComments?: Comment[];
 }
 
-export default function CommentSection({ articleId, initialComments }: CommentSectionProps) {
+export default function CommentSection({ articleId, initialComments = [] }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [name, setName] = useState('');
   const [content, setContent] = useState('');

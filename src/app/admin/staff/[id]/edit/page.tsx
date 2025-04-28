@@ -1,347 +1,286 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { useEffect, useState } from 'react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import AdminLayout from '@/components/admin/AdminLayout';
+import { PageProps } from 'next';
 
-interface StaffMember {
-  id: string;
+interface FormData {
   first_name: string;
   last_name: string;
   title: string;
-  department: string | null;
-  image_url: string | null;
-  bio: string | null;
-  contact_email: string | null;
-  linkedin_url: string | null;
-  personal_site_url: string | null;
+  bio: string;
+  image_url: string;
+  linkedin_url: string;
+  personal_site_url: string;
+  department: string;
   is_visible: boolean;
   display_order: number;
+  contact_email: string;
 }
 
-export default function EditStaffMember({ params }: { params: { id: string } }) {
+export default function EditStaffPage({ params }: PageProps) {
   const router = useRouter();
-  const { id } = params;
-  
-  const [formData, setFormData] = useState<Partial<StaffMember>>({
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState<FormData>({
     first_name: '',
     last_name: '',
     title: '',
-    department: '',
-    image_url: '',
     bio: '',
-    contact_email: '',
+    image_url: '',
     linkedin_url: '',
     personal_site_url: '',
+    department: 'civil_rights',
     is_visible: true,
-    display_order: 9999
+    display_order: 9999,
+    contact_email: '',
   });
-  
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const supabase = createClientComponentClient();
 
   useEffect(() => {
-    async function fetchStaffMember() {
+    async function fetchStaff() {
       try {
         const { data, error } = await supabase
           .from('staff')
-          .select('*')
-          .eq('id', id)
+          .select()
+          .eq('id', params.id)
           .single();
-          
+
         if (error) throw error;
-        
+
         if (data) {
-          setFormData(data);
-        } else {
-          setError('Staff member not found');
+          setFormData({
+            first_name: data.first_name,
+            last_name: data.last_name,
+            title: data.title || '',
+            bio: data.bio || '',
+            image_url: data.image_url || '',
+            linkedin_url: data.linkedin_url || '',
+            personal_site_url: data.personal_site_url || '',
+            department: data.department || 'civil_rights',
+            is_visible: data.is_visible !== undefined ? data.is_visible : true,
+            display_order: data.display_order || 9999,
+            contact_email: data.contact_email || '',
+          });
         }
       } catch (err) {
-        console.error('Error fetching staff member:', err);
+        console.error('Error fetching staff:', err);
         setError('Failed to load staff member');
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     }
-    
-    fetchStaffMember();
-  }, [id]);
+
+    fetchStaff();
+  }, [params.id, supabase]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setError(null);
 
     try {
-      const response = await fetch(`/api/admin/staff?id=${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const { error } = await supabase
+        .from('staff')
+        .update(formData)
+        .eq('id', params.id);
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to update staff member');
-      }
+      if (error) throw error;
 
       router.push('/admin/staff');
     } catch (err) {
-      console.error('Error updating staff member:', err);
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
-    } finally {
-      setIsSubmitting(false);
+      console.error('Error updating staff:', err);
+      setError('Failed to update staff member');
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData(prev => ({ ...prev, [name]: checked }));
-  };
-
-  if (isLoading) {
-    return (
-      <AdminLayout>
-        <div className="flex justify-center items-center h-64">
-          <p className="text-gray-500">Loading...</p>
-        </div>
-      </AdminLayout>
-    );
-  }
-
-  if (error && !isSubmitting) {
-    return (
-      <AdminLayout>
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-        <button
-          onClick={() => router.push('/admin/staff')}
-          className="text-blue-600 hover:text-blue-800"
-        >
-          Back to Staff List
-        </button>
-      </AdminLayout>
-    );
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (
     <AdminLayout>
-      <div className="bg-white shadow sm:rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-6">Edit Staff Member</h1>
-          
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-              {error}
-            </div>
-          )}
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  name="first_name"
-                  id="first_name"
-                  required
-                  value={formData.first_name || ''}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                />
-              </div>
+      <div className="max-w-4xl mx-auto py-8">
+        <h1 className="text-2xl font-bold mb-6">Edit Staff Member</h1>
 
-              <div>
-                <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  name="last_name"
-                  id="last_name"
-                  required
-                  value={formData.last_name || ''}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                />
-              </div>
-            </div>
+        {error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6">
+            {error}
+          </div>
+        )}
 
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                Title
-              </label>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">
+              First Name
+            </label>
+            <input
+              type="text"
+              id="first_name"
+              value={formData.first_name}
+              onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">
+              Last Name
+            </label>
+            <input
+              type="text"
+              id="last_name"
+              value={formData.last_name}
+              onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+              Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="department" className="block text-sm font-medium text-gray-700">
+              Department
+            </label>
+            <select
+              id="department"
+              value={formData.department}
+              onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
+            >
+              <option value="civil_rights">Civil Rights</option>
+              <option value="economics">Economics</option>
+              <option value="education">Education</option>
+              <option value="environment">Environment</option>
+              <option value="public_health">Public Health</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+              Bio
+            </label>
+            <textarea
+              id="bio"
+              value={formData.bio}
+              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+              rows={4}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="image_url" className="block text-sm font-medium text-gray-700">
+              Image URL
+            </label>
+            <input
+              type="url"
+              id="image_url"
+              value={formData.image_url}
+              onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="linkedin_url" className="block text-sm font-medium text-gray-700">
+              LinkedIn URL
+            </label>
+            <input
+              type="url"
+              id="linkedin_url"
+              value={formData.linkedin_url}
+              onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="personal_site_url" className="block text-sm font-medium text-gray-700">
+              Personal Website URL
+            </label>
+            <input
+              type="url"
+              id="personal_site_url"
+              value={formData.personal_site_url}
+              onChange={(e) => setFormData({ ...formData, personal_site_url: e.target.value })}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="contact_email" className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
+            <input
+              type="email"
+              id="contact_email"
+              value={formData.contact_email}
+              onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="flex items-center">
               <input
-                type="text"
-                name="title"
-                id="title"
-                required
-                value={formData.title || ''}
-                onChange={handleChange}
-                placeholder="e.g. Senior Editor, Marketing Manager"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="department" className="block text-sm font-medium text-gray-700">
-                Department
-              </label>
-              <select
-                name="department"
-                id="department"
-                value={formData.department || ''}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              >
-                <option value="">Select a department</option>
-                <option value="admin">Admin</option>
-                <option value="marketing">Marketing</option>
-                <option value="editing">Editing</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="contact_email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                type="email"
-                name="contact_email"
-                id="contact_email"
-                value={formData.contact_email || ''}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
-                Biography
-              </label>
-              <textarea
-                name="bio"
-                id="bio"
-                rows={4}
-                value={formData.bio || ''}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="image_url" className="block text-sm font-medium text-gray-700">
-                Profile Image URL
-              </label>
-              <input
-                type="url"
-                name="image_url"
-                id="image_url"
-                value={formData.image_url || ''}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              />
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium text-gray-700">External Links</h3>
-              
-              <div>
-                <label htmlFor="linkedin_url" className="block text-sm font-medium text-gray-700">
-                  LinkedIn
-                </label>
-                <input
-                  type="url"
-                  name="linkedin_url"
-                  id="linkedin_url"
-                  value={formData.linkedin_url || ''}
-                  onChange={handleChange}
-                  placeholder="https://linkedin.com/in/username"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="personal_site_url" className="block text-sm font-medium text-gray-700">
-                  Personal Website
-                </label>
-                <input
-                  type="url"
-                  name="personal_site_url"
-                  id="personal_site_url"
-                  value={formData.personal_site_url || ''}
-                  onChange={handleChange}
-                  placeholder="https://example.com"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center">
-              <input
-                id="is_visible"
-                name="is_visible"
                 type="checkbox"
-                checked={formData.is_visible || false}
-                onChange={handleCheckboxChange}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                checked={formData.is_visible}
+                onChange={(e) => setFormData({ ...formData, is_visible: e.target.checked })}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              <label htmlFor="is_visible" className="ml-2 block text-sm text-gray-900">
-                Visible on public staff page
-              </label>
-            </div>
+              <span className="ml-2 text-sm text-gray-700">Visible to public</span>
+            </label>
+          </div>
 
-            <div>
-              <label htmlFor="display_order" className="block text-sm font-medium text-gray-700">
-                Display Order
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <input
-                  type="number"
-                  name="display_order"
-                  id="display_order"
-                  value={formData.display_order || 9999}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  min="1"
-                />
-              </div>
-              <p className="mt-1 text-sm text-gray-500">
-                Lower numbers will appear first on the staff page. Use the staff list page for drag-and-drop reordering.
-              </p>
-            </div>
+          <div>
+            <label htmlFor="display_order" className="block text-sm font-medium text-gray-700">
+              Display Order
+            </label>
+            <input
+              type="number"
+              id="display_order"
+              value={formData.display_order}
+              onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) })}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              Lower numbers will appear first. Use the staff list page for drag-and-drop reordering.
+            </p>
+          </div>
 
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-              >
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </form>
-        </div>
+          <div className="flex justify-end space-x-4">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
       </div>
     </AdminLayout>
   );
