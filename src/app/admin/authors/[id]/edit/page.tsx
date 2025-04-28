@@ -1,231 +1,198 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { useEffect, useState } from 'react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import AdminLayout from '@/components/admin/AdminLayout';
+import { PageProps } from 'next';
 
-// Define error type
-interface SupabaseError {
-  message: string;
-  details?: string;
-  hint?: string;
+interface FormData {
+  first_name: string;
+  last_name: string;
+  bio: string;
+  image_url: string;
+  linkedin_url: string;
+  personal_site_url: string;
   code?: string;
 }
 
-export default function EditAuthor({ params }: { params: { id: string } }) {
+export default function EditAuthorPage({ params }: PageProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     first_name: '',
     last_name: '',
-    description: '',
+    bio: '',
     image_url: '',
-    is_visible: true,
-    display_order: 9999,
+    linkedin_url: '',
+    personal_site_url: '',
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const supabase = createClientComponentClient();
 
   useEffect(() => {
-    const fetchAuthor = async () => {
+    async function fetchAuthor() {
       try {
         const { data, error } = await supabase
           .from('authors')
-          .select('*')
+          .select()
           .eq('id', params.id)
           .single();
 
         if (error) throw error;
-        
+
         if (data) {
           setFormData({
-            first_name: data.first_name || '',
-            last_name: data.last_name || '',
-            description: data.description || '',
+            first_name: data.first_name,
+            last_name: data.last_name,
+            bio: data.bio || '',
             image_url: data.image_url || '',
-            is_visible: data.is_visible !== undefined ? data.is_visible : true,
-            display_order: data.display_order || 9999,
+            linkedin_url: data.linkedin_url || '',
+            personal_site_url: data.personal_site_url || '',
           });
         }
-      } catch (error: unknown) {
-        const supabaseError = error as SupabaseError;
-        console.error('Error fetching author:', supabaseError?.message || 'Unknown error');
-        alert('Failed to load author data. Please try again.');
+      } catch (err) {
+        console.error('Error fetching author:', err);
+        setError('Failed to load author');
       } finally {
         setLoading(false);
       }
-    };
+    }
 
     fetchAuthor();
-  }, [params.id]);
+  }, [params.id, supabase]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setError(null);
 
     try {
       const { error } = await supabase
         .from('authors')
-        .update({
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          description: formData.description,
-          image_url: formData.image_url,
-          is_visible: formData.is_visible,
-          display_order: formData.display_order,
-          updated_at: new Date().toISOString(),
-        })
+        .update(formData)
         .eq('id', params.id);
 
       if (error) throw error;
 
       router.push('/admin/authors');
-    } catch (error: unknown) {
-      const supabaseError = error as SupabaseError;
-      console.error('Error updating author:', supabaseError?.message || 'Unknown error');
-      alert('Failed to update author. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target as HTMLInputElement;
-    if (type === 'checkbox') {
-      const target = e.target as HTMLInputElement;
-      setFormData(prev => ({ ...prev, [name]: target.checked }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+    } catch (err) {
+      console.error('Error updating author:', err);
+      setError('Failed to update author');
     }
   };
 
   if (loading) {
-    return (
-      <AdminLayout>
-        <div className="flex justify-center items-center h-64">
-          <p>Loading author data...</p>
-        </div>
-      </AdminLayout>
-    );
+    return <div>Loading...</div>;
   }
 
   return (
     <AdminLayout>
-      <div className="bg-white shadow sm:rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-6">Edit Author</h1>
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">
-                First Name
-              </label>
-              <input
-                type="text"
-                name="first_name"
-                id="first_name"
-                required
-                value={formData.first_name}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              />
-            </div>
+      <div className="max-w-4xl mx-auto py-8">
+        <h1 className="text-2xl font-bold mb-6">Edit Author</h1>
 
-            <div>
-              <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">
-                Last Name
-              </label>
-              <input
-                type="text"
-                name="last_name"
-                id="last_name"
-                required
-                value={formData.last_name}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              />
-            </div>
+        {error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6">
+            {error}
+          </div>
+        )}
 
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                Biography
-              </label>
-              <textarea
-                name="description"
-                id="description"
-                rows={4}
-                value={formData.description}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">
+              First Name
+            </label>
+            <input
+              type="text"
+              id="first_name"
+              value={formData.first_name}
+              onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="image_url" className="block text-sm font-medium text-gray-700">
-                Profile Image URL
-              </label>
-              <input
-                type="url"
-                name="image_url"
-                id="image_url"
-                value={formData.image_url}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              />
-            </div>
+          <div>
+            <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">
+              Last Name
+            </label>
+            <input
+              type="text"
+              id="last_name"
+              value={formData.last_name}
+              onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
+            />
+          </div>
 
-            <div className="flex items-center mt-4">
-              <input
-                type="checkbox"
-                name="is_visible"
-                id="is_visible"
-                checked={formData.is_visible}
-                onChange={handleChange}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="is_visible" className="ml-2 block text-sm text-gray-900">
-                Visible to public
-              </label>
-            </div>
+          <div>
+            <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+              Bio
+            </label>
+            <textarea
+              id="bio"
+              value={formData.bio}
+              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+              rows={4}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
 
-            <div>
-              <label htmlFor="display_order" className="block text-sm font-medium text-gray-700">
-                Display Order
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <input
-                  type="number"
-                  name="display_order"
-                  id="display_order"
-                  value={formData.display_order}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  min="1"
-                />
-              </div>
-              <p className="mt-1 text-sm text-gray-500">
-                Lower numbers will appear first on the authors page. Use the authors list page for drag-and-drop reordering.
-              </p>
-            </div>
+          <div>
+            <label htmlFor="image_url" className="block text-sm font-medium text-gray-700">
+              Image URL
+            </label>
+            <input
+              type="url"
+              id="image_url"
+              value={formData.image_url}
+              onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
 
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-              >
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </form>
-        </div>
+          <div>
+            <label htmlFor="linkedin_url" className="block text-sm font-medium text-gray-700">
+              LinkedIn URL
+            </label>
+            <input
+              type="url"
+              id="linkedin_url"
+              value={formData.linkedin_url}
+              onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="personal_site_url" className="block text-sm font-medium text-gray-700">
+              Personal Website URL
+            </label>
+            <input
+              type="url"
+              id="personal_site_url"
+              value={formData.personal_site_url}
+              onChange={(e) => setFormData({ ...formData, personal_site_url: e.target.value })}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
       </div>
     </AdminLayout>
   );
