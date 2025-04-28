@@ -1,388 +1,180 @@
-'use client';
-
-import { supabase } from '@/lib/supabase';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import Image from 'next/image';
 import Layout from '@/components/layout/Layout';
-import Sidebar from '@/components/layout/Sidebar';
-import React, { useState, useEffect } from 'react';
 
-interface Author {
-  id: number;
-  first_name: string;
-  last_name: string;
-  image_url: string | null;
-  name?: string;
-  is_visible: boolean;
-}
-
-interface Article {
-  id: number;
-  title: string;
-  cover_image_url: string | null;
-  published_at: string | null;
-  content?: string | null;
-  tags: string[];
-  author: Author;
-}
-
-interface ArticleRow {
-  id: number;
-  title: string;
-  cover_image_url: string | null;
-  published_at: string | null;
-  content: string | null;
-  tags: string[] | null;
-  author: {
-    id: number;
-    first_name: string;
-    last_name: string;
-    image_url: string | null;
-    is_visible: boolean;
-  };
-}
-
-async function getFeaturedArticles(): Promise<Article[]> {
-  console.log('Fetching featured articles');
-  const { data, error } = await supabase
-    .from('articles')
-    .select(`
-      id, title, cover_image_url, published_at, content, tags,
-      author:author_id (
-        id, first_name, last_name, image_url, is_visible
-      )
-    `)
-    .eq('is_visible', true)
-    .not('published_at', 'is', null)
-    .order('published_at', { ascending: false })
-    .limit(5)
-    .returns<ArticleRow[]>();
-
-  if (error) {
-    console.error('Error fetching featured articles:', error);
-    return [];
-  }
-
-  console.log('Found featured articles:', data);
+export default async function Home() {
+  const cookieStore = cookies();
+  const supabase = createServerComponentClient({ cookies: () => cookieStore });
   
-  // Filter out articles with non-visible authors
-  const filteredArticles = (data || []).filter(article => article.author.is_visible);
-  
-  return filteredArticles.map(article => ({
-    id: article.id,
-    title: article.title,
-    cover_image_url: article.cover_image_url,
-    published_at: article.published_at,
-    content: article.content,
-    tags: article.tags || [],
-    author: {
-      id: article.author.id,
-      first_name: article.author.first_name,
-      last_name: article.author.last_name,
-      image_url: article.author.image_url,
-      is_visible: article.author.is_visible,
-      name: `${article.author.first_name} ${article.author.last_name}`
-    }
-  }));
-}
-
-async function getRecentArticles(): Promise<Article[]> {
-  console.log('Fetching recent articles');
-  const { data, error } = await supabase
-    .from('articles')
-    .select(`
-      id, title, cover_image_url, published_at, content, tags,
-      author:author_id (
-        id, first_name, last_name, image_url, is_visible
-      )
-    `)
-    .eq('is_visible', true)
-    .not('published_at', 'is', null)
-    .order('published_at', { ascending: false })
-    .limit(10)
-    .returns<ArticleRow[]>();
-
-  if (error) {
-    console.error('Error fetching recent articles:', error);
-    return [];
-  }
-
-  console.log('Found recent articles:', data);
-  
-  // Filter out articles with non-visible authors
-  const filteredArticles = (data || []).filter(article => article.author.is_visible);
-  
-  return filteredArticles.map(article => ({
-    id: article.id,
-    title: article.title,
-    cover_image_url: article.cover_image_url,
-    published_at: article.published_at,
-    content: article.content,
-    tags: article.tags || [],
-    author: {
-      id: article.author.id,
-      first_name: article.author.first_name,
-      last_name: article.author.last_name,
-      image_url: article.author.image_url,
-      is_visible: article.author.is_visible,
-      name: `${article.author.first_name} ${article.author.last_name}`
-    }
-  }));
-}
-
-// Helper function to truncate text
-function truncateText(text: string | null | undefined, maxLength: number = 150): string {
-  if (!text) return '';
-  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-}
-
-// Helper function to get unique authors from articles
-function getUniqueAuthors(articles: Article[]): Author[] {
-  const uniqueAuthors = new Map<number, Author>();
-  
-  articles.forEach(article => {
-    if (!uniqueAuthors.has(article.author.id)) {
-      uniqueAuthors.set(article.author.id, article.author);
-    }
-  });
-  
-  return Array.from(uniqueAuthors.values());
-}
-
-export default function Home() {
-  const [featuredArticles, setFeaturedArticles] = useState<Article[]>([]);
-  const [recentArticles, setRecentArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    async function loadArticles() {
-      try {
-        const [featured, recent] = await Promise.all([
-          getFeaturedArticles(),
-          getRecentArticles()
-        ]);
-        
-        setFeaturedArticles(featured);
-        setRecentArticles(recent);
-      } catch (error) {
-        console.error('Error loading articles:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    
-    loadArticles();
-  }, []);
-  
-  // Get unique contributors from all articles
-  const allArticles = [...featuredArticles, ...recentArticles];
-  const contributors = getUniqueAuthors(allArticles);
+  // Fetch founders from staff table
+  const { data: founders } = await supabase
+    .from('staff')
+    .select()
+    .ilike('title', '%Founder%')
+    .order('display_order');
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Main Content Column */}
-          <div className="lg:w-3/4">
-            {/* Hero Section */}
-            <section>
-              {loading ? (
-                <div className="animate-pulse">
-                  <div className="h-64 bg-gray-200 mb-4"></div>
-                  <div className="h-8 bg-gray-200 w-3/4 mb-2"></div>
-                  <div className="h-4 bg-gray-100 w-1/2"></div>
-                </div>
-              ) : featuredArticles.length > 0 ? (
-                <div className="cfr-featured-article">
-                  <div className="relative mb-6">
-                    {featuredArticles[0].cover_image_url && (
-                      <div className="relative w-full cfr-featured-image-container">
-                        <Image 
-                          src={featuredArticles[0].cover_image_url} 
-                          alt={featuredArticles[0].title}
-                          fill
-                          className="cfr-article-image"
-                        />
+      <div>
+        {/* Hero Section */}
+        <section className="bg-gradient-to-b from-white to-blue-50 py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+                Welcome to PIVOT
+              </h1>
+            </div>
+          </div>
+        </section>
+
+        {/* About Us Section */}
+        <section className="bg-white py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-3xl font-bold mb-6">About Us</h2>
+              <p className="text-gray-600 mb-4">
+                PIVOT is a dynamic platform where policy meets perspective. We bring together diverse voices to analyze, discuss, and shape the policies that affect our communities.
+              </p>
+              <p className="text-gray-600 mb-4">
+                Through rigorous research and inclusive dialogue, we strive to make complex policy issues accessible and actionable for everyone.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Programs Section */}
+        <section className="bg-blue-50 py-16">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-8 text-center">Our Programs</h2>
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              {/* PIVOT Voices */}
+              <div className="bg-white rounded-lg p-8 shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-2xl font-bold mb-4 text-blue-600">PIVOT Voices</h3>
+                <p className="text-gray-600 mb-4">
+                  Our flagship platform for policy experts, researchers, and thought leaders to share their insights and perspectives on pressing issues facing our society.
+                </p>
+                <a
+                  href="https://commoninja.site/7f9de57f-9efb-41d3-b0dc-3a6e4bc240c8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 font-semibold hover:text-blue-700"
+                >
+                  Become a Staff Writer →
+                </a>
+              </div>
+
+              {/* PIVOT Fellowship */}
+              <div className="bg-white rounded-lg p-8 shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-2xl font-bold mb-4 text-blue-600">PIVOT Fellowship</h3>
+                <p className="text-gray-600 mb-4">
+                  A transformative program that nurtures the next generation of policy leaders through mentorship, research opportunities, and hands-on policy analysis experience.
+                </p>
+                <a
+                  href="https://commoninja.site/7f9de57f-9efb-41d3-b0dc-3a6e4bc240c8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 font-semibold hover:text-blue-700"
+                >
+                  Apply for Fellowship →
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Founders Section */}
+        <section className="bg-white py-16">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-8 text-center">Meet Our Founders</h2>
+            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {founders?.map((founder) => (
+                <div key={founder.id} className="text-center bg-white rounded-lg p-6 shadow-md">
+                  <div className="relative w-48 h-48 mx-auto mb-4 rounded-full overflow-hidden">
+                    {founder.image_url ? (
+                      <Image
+                        src={founder.image_url}
+                        alt={`${founder.first_name} ${founder.last_name}`}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-2xl text-gray-500">
+                          {founder.first_name[0]}{founder.last_name[0]}
+                        </span>
                       </div>
                     )}
-                    {featuredArticles[0].tags && featuredArticles[0].tags.length > 0 && (
-                      <span className="cfr-topic-label absolute top-0 left-0 z-10">{featuredArticles[0].tags[0]}</span>
-                    )}
                   </div>
-                  <div className="mb-8">
-                    <Link href={`/articles/${featuredArticles[0].id}`}>
-                      <h2 className="cfr-article-title text-2xl mb-3">{featuredArticles[0].title}</h2>
-                    </Link>
-                    <p className="text-gray-600 mb-3">
-                      {truncateText(featuredArticles[0].content, 250)}
-                      {featuredArticles[0].content && featuredArticles[0].content.length > 250 && (
-                        <Link href={`/articles/${featuredArticles[0].id}`}>
-                          <span className="font-bold" style={{ color: '#293A4A' }}> READ MORE</span>
-                        </Link>
-                      )}
-                    </p>
-                    <div className="cfr-article-meta">
-                      <span>Article by </span>
-                      <Link 
-                        href={`/authors/${featuredArticles[0].author.id}`}
-                        className="cfr-author-link"
-                      >
-                        {featuredArticles[0].author.name}
-                      </Link>
+                  <h3 className="text-xl font-bold mb-2">{founder.first_name} {founder.last_name}</h3>
+                  <p className="text-gray-600">{founder.title}</p>
+                  <p className="text-gray-600 mt-2">{founder.bio}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Departments Preview */}
+        <section className="bg-blue-50 py-16">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-8 text-center">Our Policy Focus Areas</h2>
+            <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {departments.map((dept) => (
+                <Link
+                  key={dept.id}
+                  href={`/departments/${dept.id}`}
+                  className="group block"
+                >
+                  <div className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow bg-white">
+                    <div className={`${dept.color} h-2`} />
+                    <div className="p-6">
+                      <h3 className="text-xl font-semibold mb-2 group-hover:text-blue-600 transition-colors">
+                        {dept.name}
+                      </h3>
+                      <p className="text-gray-600">{dept.description}</p>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="text-center p-8 bg-gray-50">
-                  <p className="text-xl text-gray-500">No featured articles available</p>
-                </div>
-              )}
-
-              {/* Secondary Articles */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                {loading ? (
-                  [...Array(2)].map((_, i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="h-40 bg-gray-200 mb-3"></div>
-                      <div className="h-6 bg-gray-200 w-3/4 mb-2"></div>
-                      <div className="h-4 bg-gray-100 w-1/2"></div>
-                    </div>
-                  ))
-                ) : (
-                  featuredArticles.slice(1, 3).map(article => (
-                    <div key={article.id} className="cfr-article-card">
-                      <div className="relative mb-4">
-                        {article.cover_image_url && (
-                          <div className="relative w-full cfr-secondary-image-container">
-                            <Image 
-                              src={article.cover_image_url} 
-                              alt={article.title}
-                              fill
-                              className="cfr-article-image"
-                            />
-                          </div>
-                        )}
-                        {article.tags && article.tags.length > 0 && (
-                          <span className="cfr-topic-label absolute top-0 left-0 z-10">{article.tags[0]}</span>
-                        )}
-                      </div>
-                      <Link href={`/articles/${article.id}`}>
-                        <h3 className="cfr-article-title text-xl mb-2">{article.title}</h3>
-                      </Link>
-                      <p className="text-gray-600 mb-2">
-                        {truncateText(article.content, 120)}
-                      </p>
-                      <div className="cfr-article-meta">
-                        <span>Article by </span>
-                        <Link 
-                          href={`/authors/${article.author.id}`}
-                          className="cfr-author-link"
-                        >
-                          {article.author.name}
-                        </Link>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
-
-            {/* Recent Articles Section */}
-            <section className="mb-12">
-              <h2 className="cfr-section-title mb-6">Recent Articles</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {loading ? (
-                  [...Array(6)].map((_, i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="h-32 bg-gray-200 mb-3"></div>
-                      <div className="h-5 bg-gray-200 w-3/4 mb-2"></div>
-                      <div className="h-4 bg-gray-100 w-1/2"></div>
-                    </div>
-                  ))
-                ) : (
-                  recentArticles.slice(0, 6).map(article => (
-                    <div key={article.id} className="cfr-article-card">
-                      <div className="relative mb-4">
-                        {article.cover_image_url && (
-                          <div className="relative w-full cfr-recent-image-container">
-                            <Image 
-                              src={article.cover_image_url} 
-                              alt={article.title}
-                              fill
-                              className="cfr-article-image"
-                            />
-                          </div>
-                        )}
-                      </div>
-                      <Link href={`/articles/${article.id}`}>
-                        <h3 className="cfr-article-title text-lg mb-2">{article.title}</h3>
-                      </Link>
-                      <div className="cfr-article-meta">
-                        <span>Article by </span>
-                        <Link 
-                          href={`/authors/${article.author.id}`}
-                          className="cfr-author-link"
-                        >
-                          {article.author.name}
-                        </Link>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
-
-            {/* Contributors Section */}
-            <section className="mb-12">
-              <h2 className="cfr-section-title mb-6">Our Contributors</h2>
-              {loading ? (
-                <div className="flex flex-wrap gap-4">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="animate-pulse flex items-center bg-white p-2">
-                      <div className="w-10 h-10 bg-gray-200 mr-2"></div>
-                      <div className="h-4 bg-gray-200 w-24"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-4">
-                  {contributors.map(author => (
-                    <Link 
-                      key={author.id}
-                      href={`/authors/${author.id}`}
-                      className="flex items-center bg-white p-2 hover:shadow-md transition-shadow"
-                    >
-                      <div className="relative w-10 h-10 mr-2">
-                        {author.image_url ? (
-                          <Image 
-                            src={author.image_url} 
-                            alt={author.name || `${author.first_name} ${author.last_name}`}
-                            width={40}
-                            height={40}
-                            className="cfr-author-image"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 bg-gray-200 flex items-center justify-center">
-                            <span className="text-gray-500 font-medium">
-                              {author.first_name.charAt(0)}{author.last_name.charAt(0)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <span className="font-medium">{author.name || `${author.first_name} ${author.last_name}`}</span>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </section>
+                </Link>
+              ))}
+            </div>
           </div>
-          
-          {/* Sidebar Column */}
-          <div className="lg:w-1/4">
-            <Sidebar />
-          </div>
-        </div>
+        </section>
       </div>
     </Layout>
   );
 }
+
+const departments = [
+  {
+    id: "civil_rights",
+    name: "Civil Rights",
+    description: "Advocating for equality, justice, and fundamental human rights for all.",
+    color: "bg-purple-500"
+  },
+  {
+    id: "economics",
+    name: "Economics",
+    description: "Analyzing economic policies and their impact on communities.",
+    color: "bg-blue-500"
+  },
+  {
+    id: "education",
+    name: "Education",
+    description: "Promoting equitable access to quality education.",
+    color: "bg-green-500"
+  },
+  {
+    id: "environment",
+    name: "Environment",
+    description: "Addressing climate change and environmental sustainability.",
+    color: "bg-emerald-500"
+  },
+  {
+    id: "public_health",
+    name: "Public Health",
+    description: "Improving health outcomes and healthcare accessibility.",
+    color: "bg-red-500"
+  }
+];
