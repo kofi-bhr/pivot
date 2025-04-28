@@ -115,9 +115,13 @@ async function getArticleComments(articleId: string): Promise<Comment[]> {
   return data || [];
 }
 
-export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ArticlePage({
+  params,
+}: {
+  params: { id: string };
+}) {
   // Wait for params to be available, then use the ID directly as a string
-  const { id } = await params;
+  const { id } = params;
   
   // No need to convert to number since we're using UUID strings
   const articleId = id;

@@ -2,13 +2,11 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import BriefForm from '../../_components/BriefForm';
 
-interface EditBriefPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default async function EditBriefPage({ params }: EditBriefPageProps) {
+export default async function EditBriefPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const cookieStore = cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
 

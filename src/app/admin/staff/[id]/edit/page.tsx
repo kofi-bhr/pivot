@@ -20,7 +20,7 @@ interface StaffMember {
   display_order: number;
 }
 
-export default function EditStaffMember({ params }: { params: Promise<{ id: string }> & { id: string } }) {
+export default function EditStaffMember({ params }: { params: { id: string } }) {
   const router = useRouter();
   const { id } = params;
   

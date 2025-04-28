@@ -32,13 +32,11 @@ const departmentInfo = {
 
 type Department = keyof typeof departmentInfo;
 
-interface DepartmentPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default async function DepartmentPage({ params }: DepartmentPageProps) {
+export default async function DepartmentPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   if (!(params.id in departmentInfo)) {
     notFound();
   }
