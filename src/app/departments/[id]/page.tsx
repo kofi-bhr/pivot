@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { DepartmentBadge } from '@/components/DepartmentBadge';
 import Image from 'next/image';
 import Layout from '@/components/layout/Layout';
+import React from 'react';
 
 const departmentInfo = {
   civil_rights: {
