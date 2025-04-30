@@ -6,7 +6,7 @@ export default function GetInvolved() {
       <div className="bg-white">
         <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Get Involved</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Join</h2>
             <p className="mt-6 text-lg leading-8 text-gray-600">
               Join PIVOT as a writer or fellow and help shape policy discussions.
             </p>

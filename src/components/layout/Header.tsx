@@ -9,15 +9,15 @@ interface NavLink {
 }
 
 const leftNavigation: NavLink[] = [
-  { name: 'Articles', href: '/articles' },
+  { name: 'Voices', href: '/articles' },
   { name: 'Partners', href: '/partners' },
-  { name: 'Get Involved', href: '/get-involved' },
+  { name: 'Join', href: '/get-involved' },
 ];
 
 const rightNavigation: NavLink[] = [
   { name: 'Authors', href: '/authors' },
   { name: 'Staff', href: '/staff' },
-  { name: 'About', href: '/about' },
+  { name: 'Fellows', href: '/fellowship' },
 ];
 
 export default function Header() {

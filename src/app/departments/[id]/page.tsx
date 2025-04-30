@@ -11,22 +11,27 @@ const departmentInfo = {
   civil_rights: {
     title: "Civil Rights",
     description: "Our civil rights department focuses on protecting and advancing fundamental human rights, ensuring equal treatment under the law, and advocating for justice reform.",
+    dbValue: "civil rights"
   },
   economics: {
     title: "Economics",
     description: "The economics department analyzes fiscal policies, economic trends, and their impacts on communities, with a focus on promoting equitable economic growth.",
+    dbValue: "economics"
   },
   education: {
     title: "Education",
     description: "Our education team works to ensure equal access to quality education, addressing systemic barriers and promoting innovative learning solutions.",
+    dbValue: "education"
   },
   environment: {
     title: "Environment",
     description: "The environment department tackles climate change, sustainability, and environmental justice issues through research-backed policy recommendations.",
+    dbValue: "environmental"
   },
   public_health: {
     title: "Public Health",
     description: "Our public health experts work on improving healthcare accessibility, addressing health disparities, and promoting evidence-based health policies.",
+    dbValue: "public health"
   },
 } as const;
 
@@ -58,8 +63,9 @@ export default async function DepartmentPage({
     supabase
       .from('staff')
       .select()
-      .eq('department', params.id)
+      .eq('department', departmentInfo[params.id as Department].dbValue)
       .eq('is_visible', true)
+      .ilike('title', '%head%')
       .single()
   ]);
 
