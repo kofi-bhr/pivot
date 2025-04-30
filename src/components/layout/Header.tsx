@@ -11,7 +11,7 @@ interface NavLink {
 const leftNavigation: NavLink[] = [
   { name: 'Articles', href: '/articles' },
   { name: 'Partners', href: '/partners' },
-  { name: 'Join', href: 'https://forms.gle/VHDtEzJgNPLGNZiL9', external: true },
+  { name: 'Get Involved', href: '/get-involved' },
 ];
 
 const rightNavigation: NavLink[] = [
@@ -35,13 +35,12 @@ export default function Header() {
             <div className="cfr-logo">
               <Image 
                 src="/PIVOT-LOGO.svg" 
-                alt="go to https://www.venturedglobal.org for a surprise" 
+                alt="PIVOT Logo" 
                 width={100} 
-                height={35} 
+                height={40} 
                 priority
               />
             </div>
-            <p className="text-xs italic text-gray-500 mt-1">&ldquo;When the world turns, we lead&rdquo;</p>
           </Link>
         </div>
         
@@ -77,13 +76,12 @@ export default function Header() {
             <div className="cfr-logo">
               <Image 
                 src="/PIVOT-LOGO.svg" 
-                alt="go to https://www.venturedglobal.org for a surprise" 
-                width={120} 
+                alt="PIVOT Logo" 
+                width={100} 
                 height={40} 
                 priority
               />
             </div>
-            <p className="text-xs italic text-gray-500 mt-1">&ldquo;When the world turns, we lead&rdquo;</p>
           </Link>
           
           <nav className="flex items-center space-x-8">

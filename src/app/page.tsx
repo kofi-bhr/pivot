@@ -31,15 +31,48 @@ export default async function Home() {
 
         {/* About Us Section */}
         <section className="bg-white py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-bold mb-6">About Us</h2>
-              <p className="text-gray-600 mb-4">
-                PIVOT is a dynamic platform where policy meets perspective. We bring together diverse voices to analyze, discuss, and shape the policies that affect our communities.
+              <p className="text-lg leading-8 text-gray-600 mb-12">
+                PIVOT is a youth-led think tank, focusing on amplifying young voices in the policymaking process in two main ways. Through PIVOT Voices, youth are given a platform to publish op-eds, articles, and research papers on issues they feel passionately about. Through the PIVOT Fellowship, we empower young leaders to design original, solutions-focused policy briefs and equip them with the skills needed to share their ideas with real-world changemakers.
               </p>
-              <p className="text-gray-600 mb-4">
-                Through rigorous research and inclusive dialogue, we strive to make complex policy issues accessible and actionable for everyone.
-              </p>
+            </div>
+
+            <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+              <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2">
+                <div className="flex flex-col">
+                  <dt className="text-xl font-semibold leading-7 text-gray-900">
+                    PIVOT Voices
+                  </dt>
+                  <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+                    <p className="flex-auto">
+                      A platform for youth to publish op-eds, articles, and research papers on issues they feel passionately about.
+                    </p>
+                    <p className="mt-6">
+                      <Link href="/articles" className="text-sm font-semibold leading-6 text-gray-900">
+                        Read our articles <span aria-hidden="true">→</span>
+                      </Link>
+                    </p>
+                  </dd>
+                </div>
+
+                <div className="flex flex-col">
+                  <dt className="text-xl font-semibold leading-7 text-gray-900">
+                    PIVOT Fellowship
+                  </dt>
+                  <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+                    <p className="flex-auto">
+                      A program empowering young leaders to design original, solutions-focused policy briefs and equipping them with the skills needed to share their ideas with real-world changemakers.
+                    </p>
+                    <p className="mt-6">
+                      <Link href="/fellowship" className="text-sm font-semibold leading-6 text-gray-900">
+                        Learn more <span aria-hidden="true">→</span>
+                      </Link>
+                    </p>
+                  </dd>
+                </div>
+              </dl>
             </div>
           </div>
         </section>
@@ -53,15 +86,15 @@ export default async function Home() {
               <div className="bg-white rounded-lg p-8 shadow-md hover:shadow-lg transition-shadow">
                 <h3 className="text-2xl font-bold mb-4 text-blue-600">PIVOT Voices</h3>
                 <p className="text-gray-600 mb-4">
-                  Our flagship platform for policy experts, researchers, and thought leaders to share their insights and perspectives on pressing issues facing our society.
+                  A platform for youth to publish op-eds, articles, and research papers on issues they feel passionately about.
                 </p>
                 <a
-                  href="https://commoninja.site/7f9de57f-9efb-41d3-b0dc-3a6e4bc240c8"
+                  href="/articles"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 font-semibold hover:text-blue-700"
                 >
-                  Become a Staff Writer →
+                  Read our articles →
                 </a>
               </div>
 
@@ -69,15 +102,15 @@ export default async function Home() {
               <div className="bg-white rounded-lg p-8 shadow-md hover:shadow-lg transition-shadow">
                 <h3 className="text-2xl font-bold mb-4 text-blue-600">PIVOT Fellowship</h3>
                 <p className="text-gray-600 mb-4">
-                  A transformative program that nurtures the next generation of policy leaders through mentorship, research opportunities, and hands-on policy analysis experience.
+                  A program empowering young leaders to design original, solutions-focused policy briefs and equipping them with the skills needed to share their ideas with real-world changemakers.
                 </p>
                 <a
-                  href="https://commoninja.site/7f9de57f-9efb-41d3-b0dc-3a6e4bc240c8"
+                  href="/fellowship"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 font-semibold hover:text-blue-700"
                 >
-                  Apply for Fellowship →
+                  Learn more →
                 </a>
               </div>
             </div>

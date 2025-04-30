@@ -1,110 +1,52 @@
-'use client';
-
 import Layout from '@/components/layout/Layout';
 
-export default function GetInvolvedPage() {
+export default function GetInvolved() {
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-12 text-center">Get Involved</h1>
-
-          {/* Staff Writer Section */}
-          <section id="staff-writer" className="mb-16">
-            <div className="bg-white rounded-lg p-8 shadow-md">
-              <h2 className="text-3xl font-bold mb-6">Become a Staff Writer</h2>
-              <p className="text-gray-600 mb-6">
-                Join our team of dedicated writers and contribute to shaping policy discussions through well-researched articles and analysis.
+      <div className="bg-white">
+        <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
+          <div className="mx-auto max-w-2xl lg:mx-0">
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Get Involved</h2>
+            <p className="mt-6 text-lg leading-8 text-gray-600">
+              Join PIVOT as a writer or fellow and help shape policy discussions.
+            </p>
+          </div>
+          
+          <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 sm:gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-2">
+            <div className="border border-gray-200 rounded-lg p-8 hover:border-gray-300 transition-colors">
+              <h3 className="text-2xl font-bold tracking-tight text-gray-900">Writers</h3>
+              <p className="mt-4 text-base leading-7 text-gray-600">
+                Share your perspectives on pressing policy issues through op-eds, articles, and research papers. Join PIVOT Voices and make your voice heard in the policy conversation.
               </p>
-
-              <h3 className="text-xl font-semibold mb-4">Benefits</h3>
-              <ul className="list-disc list-inside mb-6 text-gray-600">
-                <li>Work with experienced policy professionals</li>
-                <li>Develop your research and writing skills</li>
-                <li>Build a portfolio of published policy articles</li>
-                <li>Network with policy experts and thought leaders</li>
-                <li>Receive mentorship from senior staff members</li>
-              </ul>
-
-              <a
-                href="https://commoninja.site/7f9de57f-9efb-41d3-b0dc-3a6e4bc240c8"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-              >
-                Apply Now
-              </a>
-            </div>
-          </section>
-
-          {/* Fellowship Section */}
-          <section id="fellowship" className="mb-16">
-            <div className="bg-white rounded-lg p-8 shadow-md">
-              <h2 className="text-3xl font-bold mb-6">PIVOT Fellowship</h2>
-              <p className="text-gray-600 mb-6">
-                Our fellowship program offers a unique opportunity to work directly on policy research and advocacy while receiving mentorship from experienced professionals.
-              </p>
-
-              <h3 className="text-xl font-semibold mb-4">Program Benefits</h3>
-              <ul className="list-disc list-inside mb-6 text-gray-600">
-                <li>Hands-on policy research experience</li>
-                <li>Mentorship from policy experts</li>
-                <li>Networking opportunities</li>
-                <li>Professional development workshops</li>
-                <li>Stipend for program duration</li>
-              </ul>
-
-              <a
-                href="https://commoninja.site/7f9de57f-9efb-41d3-b0dc-3a6e4bc240c8"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-              >
-                Apply for Fellowship
-              </a>
-            </div>
-          </section>
-
-          {/* FAQ Section */}
-          <section className="mb-16">
-            <h2 className="text-3xl font-bold mb-8">Frequently Asked Questions</h2>
-            <div className="space-y-6">
-              <div className="bg-white rounded-lg p-6 shadow-md">
-                <h3 className="text-xl font-semibold mb-3">What are the time commitments?</h3>
-                <p className="text-gray-600">
-                  Staff Writers are expected to contribute at least one article per month. Fellows commit to 15-20 hours per week for the duration of the program.
-                </p>
-              </div>
-              <div className="bg-white rounded-lg p-6 shadow-md">
-                <h3 className="text-xl font-semibold mb-3">What qualifications do I need?</h3>
-                <p className="text-gray-600">
-                  We value diverse perspectives and backgrounds. Strong writing skills and a passion for policy analysis are essential. Academic or professional experience in policy-related fields is a plus.
-                </p>
-              </div>
-              <div className="bg-white rounded-lg p-6 shadow-md">
-                <h3 className="text-xl font-semibold mb-3">Is this a paid opportunity?</h3>
-                <p className="text-gray-600">
-                  Fellows receive a stipend for the duration of the program. Staff Writers are compensated per published article.
-                </p>
+              <div className="mt-8">
+                <a
+                  href="https://forms.gle/VHDtEzJgNPLGNZiL9"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                >
+                  Apply as Writer
+                </a>
               </div>
             </div>
-          </section>
 
-          {/* Contact Section */}
-          <section>
-            <div className="bg-white rounded-lg p-8 shadow-md text-center">
-              <h2 className="text-3xl font-bold mb-4">Have More Questions?</h2>
-              <p className="text-gray-600 mb-4">
-                Let&apos;s shape the future of policy together. Join our community of passionate writers and analysts making a difference.
+            <div className="border border-gray-200 rounded-lg p-8 hover:border-gray-300 transition-colors">
+              <h3 className="text-2xl font-bold tracking-tight text-gray-900">Fellows</h3>
+              <p className="mt-4 text-base leading-7 text-gray-600">
+                Design original, solutions-focused policy briefs and develop the skills to share your ideas with real-world changemakers through our fellowship program.
               </p>
-              <a
-                href="mailto:contact@pivot.org"
-                className="text-blue-600 font-semibold hover:text-blue-700"
-              >
-                contact@pivot.org
-              </a>
+              <div className="mt-8">
+                <a
+                  href="https://docs.google.com/forms/d/e/1FAIpQLSeYXwnrkO2yKZaXBiyoX4ZBvOxXtTOj3EHXhe4XSgp2UrxrSw/viewform"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                >
+                  Apply as Fellow
+                </a>
+              </div>
             </div>
-          </section>
+          </div>
         </div>
       </div>
     </Layout>

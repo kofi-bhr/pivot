@@ -1,202 +1,133 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { generateKofiComment } from '@/lib/easterEggs';
 
 interface Comment {
-  id: number | string;
-  article_id: number | string;
-  commenter_name: string;
+  id: number;
   content: string;
+  author_name: string;
   created_at: string;
-  is_easter_egg?: boolean;
 }
 
-interface CommentSectionProps {
-  articleId: number | string;
-  initialComments?: Comment[];
-}
+export default function CommentSection({ articleId }: { articleId: string }) {
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [authorName, setAuthorName] = useState('');
 
-export default function CommentSection({ articleId, initialComments = [] }: CommentSectionProps) {
-  const [comments, setComments] = useState<Comment[]>(initialComments);
-  const [name, setName] = useState('');
-  const [content, setContent] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const getEasterEggRef = useCallback((commentId: string) => {
-    const easterEggRef = document.querySelector(`#easter-egg-${commentId}`);
-    return easterEggRef;
+  useEffect(() => {
+    // Fetch comments on mount
+    fetchComments();
   }, []);
 
-  // Add Kofi's easter egg comment if chance hits
-  useEffect(() => {
-    const kofiComment = generateKofiComment(articleId);
-    if (kofiComment) {
-      // Insert Kofi's comment at a random position
-      const position = Math.floor(Math.random() * (comments.length + 1));
-      const newComments = [...comments];
-      newComments.splice(position, 0, kofiComment);
-      setComments(newComments);
-    }
-  }, [articleId, comments]);
+  const fetchComments = async () => {
+    const { data: comments, error } = await supabase
+      .from('comments')
+      .select('*')
+      .eq('article_id', articleId)
+      .order('created_at', { ascending: true });
 
-  // Set up intersection observer for easter egg comments
-  useEffect(() => {
-    const observers: IntersectionObserver[] = [];
-    
-    // Create a new observer for each easter egg comment
-    comments.forEach(comment => {
-      if (comment.is_easter_egg) {
-        const element = getEasterEggRef(String(comment.id));
-        if (element) {
-          const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-              if (entry.isIntersecting) {
-                // When easter egg comment is visible, set timeout to remove it after 3 seconds
-                setTimeout(() => {
-                  setComments(prev => prev.filter(c => c.id !== comment.id));
-                }, 3000);
-                
-                // Disconnect observer after triggering
-                observer.disconnect();
-              }
-            });
-          });
-          
-          observer.observe(element);
-          observers.push(observer);
-        }
-      }
-    });
-    
-    // Cleanup observers on unmount
-    return () => {
-      observers.forEach(observer => observer.disconnect());
-    };
-  }, [comments, getEasterEggRef]);
+    if (error) {
+      console.error('Error fetching comments:', error);
+      return;
+    }
+
+    setComments(comments || []);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !content.trim() || isSubmitting) return;
 
-    setIsSubmitting(true);
-
-    const { data, error } = await supabase
-      .from('comments')
-      .insert({
-        article_id: articleId,
-        commenter_name: name.trim(),
-        content: content.trim()
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error submitting comment:', error);
-      alert('Failed to submit comment. Please try again.');
-    } else if (data) {
-      setComments(prev => [data as Comment, ...prev]);
-      setName('');
-      setContent('');
+    if (!newComment.trim() || !authorName.trim()) {
+      return;
     }
 
-    setIsSubmitting(false);
+    const { error } = await supabase
+      .from('comments')
+      .insert([
+        {
+          content: newComment.trim(),
+          author_name: authorName.trim(),
+          article_id: articleId,
+        },
+      ]);
+
+    if (error) {
+      console.error('Error inserting comment:', error);
+      return;
+    }
+
+    // Clear form and refresh comments
+    setNewComment('');
+    setAuthorName('');
+    fetchComments();
   };
 
   return (
-    <section className="mt-12 border-t border-gray-200 pt-10">
-      <h2 className="text-2xl font-bold mb-8 font-serif">Discussion</h2>
-
-      <form onSubmit={handleSubmit} className="mb-12 bg-gray-50 p-6 rounded-lg border border-gray-100">
-        <h3 className="text-lg font-medium mb-6 text-gray-800 font-serif">Leave a comment</h3>
-        
-        <div className="mb-5">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-            Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-500 focus:border-gray-500"
-            required
-            placeholder="Your name"
-          />
-        </div>
-
-        <div className="mb-5">
-          <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
-            Comment
-          </label>
-          <textarea
-            id="comment"
-            value={content}
-            onChange={e => setContent(e.target.value)}
-            rows={4}
-            className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-500 focus:border-gray-500"
-            required
-            placeholder="Share your thoughts..."
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="bg-gray-900 text-white px-6 py-3 rounded-md hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-50 font-medium transition-colors"
-        >
-          {isSubmitting ? 'Submitting...' : 'Submit Comment'}
-        </button>
-      </form>
-
-      {comments.length > 0 ? (
-        <div className="space-y-8">
-          {comments.map(comment => (
-            <div key={comment.id} id={`easter-egg-${comment.id}`} className="border-b border-gray-100 pb-6 last:border-0">
-              <div className="flex justify-between items-start mb-3">
-                <h3 className={`font-medium text-gray-900 text-lg ${comment.is_easter_egg ? 'text-blue-600' : ''}`}>
-                  {comment.commenter_name}
-                </h3>
-                <time className="text-sm text-gray-500">
-                  {new Date(comment.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </time>
+    <div className="bg-white py-24 sm:py-32">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Comments</h2>
+          
+          {/* Comment form */}
+          <form onSubmit={handleSubmit} className="mt-12 space-y-6">
+            <div>
+              <label htmlFor="author" className="block text-sm font-medium leading-6 text-gray-900">
+                Name
+              </label>
+              <div className="mt-2">
+                <input
+                  type="text"
+                  name="author"
+                  id="author"
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                  value={authorName}
+                  onChange={(e) => setAuthorName(e.target.value)}
+                  required
+                />
               </div>
-              <p className="text-gray-700 leading-relaxed">
-                {comment.is_easter_egg ? (
-                  <span>
-                    {comment.content.includes('venturedglobal.org') ? (
-                      <>
-                        {comment.content.split('venturedglobal.org')[0]}
-                        <a 
-                          href="https://venturedglobal.org" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          venturedglobal.org
-                        </a>
-                        {comment.content.split('venturedglobal.org')[1]}
-                      </>
-                    ) : (
-                      comment.content
-                    )}
-                  </span>
-                ) : (
-                  comment.content
-                )}
-              </p>
             </div>
-          ))}
+            <div>
+              <label htmlFor="comment" className="block text-sm font-medium leading-6 text-gray-900">
+                Add your comment
+              </label>
+              <div className="mt-2">
+                <textarea
+                  rows={4}
+                  name="comment"
+                  id="comment"
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <button
+                type="submit"
+                className="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              >
+                Post comment
+              </button>
+            </div>
+          </form>
+
+          {/* Comments list */}
+          <div className="mt-16 space-y-6 divide-y divide-gray-100">
+            {comments.map((comment) => (
+              <div key={comment.id} className="border-b border-gray-100 pb-6 last:border-0">
+                <h3 className="font-medium text-gray-900 text-lg">
+                  {comment.author_name}
+                </h3>
+                <p className="mt-2 text-sm text-gray-600">
+                  {comment.content}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
-      ) : (
-        <div className="text-center py-8 text-gray-500">
-          <p>No comments yet. Be the first to share your thoughts!</p>
-        </div>
-      )}
-    </section>
+      </div>
+    </div>
   );
 }

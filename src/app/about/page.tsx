@@ -1,4 +1,5 @@
 import Layout from '@/components/layout/Layout';
+import Link from 'next/link';
 
 export default function About() {
   return (
@@ -12,79 +13,34 @@ export default function About() {
                 About PIVOT
               </h1>
               <p className="mt-6 text-lg leading-8 text-gray-600">
-                PIVOT (Policy Insights and Voices of Tomorrow) is a novel non-profit that transforms high school students into published political analysts. Everyone has opinions, so why not make them heard?
-              </p>
-              <p className="mt-4 text-lg leading-8 text-gray-600">
-                In an era of toxic political division, PIVOT stands as a powerful counterforce. We don&apos;t just publish student opinions—we&apos;re cultivating the next generation of policy insights that cut through polarizing noise with clarity and conviction.
+                PIVOT is a youth-led think tank, focusing on amplifying young voices in the policymaking process in two main ways. Through PIVOT Voices, youth are given a platform to publish op-eds, articles, and research papers on issues they feel passionately about. Through the PIVOT Fellowship, we empower young leaders to design original, solutions-focused policy briefs and equip them with the skills needed to share their ideas with real-world changemakers.
               </p>
             </div>
           </div>
         </div>
 
-        {/* What We Deliver section */}
+        {/* Programs section */}
         <div className="mx-auto mt-32 max-w-7xl px-6 sm:mt-40 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">What PIVOT Delivers</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Our Programs</h2>
             <p className="mt-6 text-lg leading-8 text-gray-600">
-              We&apos;re not just publishing articles: we are building tomorrow&apos;s political landscape.
+              We offer two main programs to amplify youth voices in policymaking:
             </p>
           </div>
           <dl className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 text-base leading-7 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-2">
             <div>
-              <dt className="font-semibold text-gray-900">A Prestigious Publishing Platform</dt>
+              <dt className="font-semibold text-gray-900">PIVOT Voices</dt>
               <dd className="mt-1 text-gray-600">
-                Exclusively for high school policy thinkers, providing a space where young voices can be heard beyond classroom walls.
+                A platform for youth to publish op-eds, articles, and research papers on issues they feel passionately about.
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-gray-900">Rigorous Editorial Mentorship</dt>
+              <dt className="font-semibold text-gray-900">PIVOT Fellowship</dt>
               <dd className="mt-1 text-gray-600">
-                We demand excellence from our contributors, providing guidance that helps develop their analytical skills and political voice.
-              </dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-gray-900">Direct Engagement with Challenging Viewpoints</dt>
-              <dd className="mt-1 text-gray-600">
-                We encourage our contributors to engage with diverse political perspectives, fostering a culture of respectful dialogue.
-              </dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-gray-900">Access to a Network</dt>
-              <dd className="mt-1 text-gray-600">
-                Connect with ambitious, politically-engaged peers who share your passion for policy and public discourse.
+                A program empowering young leaders to design original, solutions-focused policy briefs and equipping them with the skills needed to share their ideas with real-world changemakers.
               </dd>
             </div>
           </dl>
-        </div>
-
-        {/* Mission section */}
-        <div className="mx-auto mt-32 max-w-7xl px-6 sm:mt-40 lg:px-8">
-          <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-none">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Our Mission</h2>
-            <div className="mt-6 flex flex-col gap-x-8 gap-y-20 lg:flex-row">
-              <div className="lg:w-full lg:max-w-2xl lg:flex-auto">
-                <p className="text-xl leading-8 text-gray-600">
-                  At PIVOT, we believe in the power of young voices to shape the political landscape. We&apos;re redefining youth engagement in politics by:
-                </p>
-                <div className="mt-10 max-w-xl text-base leading-7 text-gray-700">
-                  <ul role="list" className="mt-8 space-y-8 text-gray-600">
-                    <li className="flex gap-x-3">
-                      <span>• Transforming high school students into published political analysts</span>
-                    </li>
-                    <li className="flex gap-x-3">
-                      <span>• Cultivating the next generation of policy insights</span>
-                    </li>
-                    <li className="flex gap-x-3">
-                      <span>• Cutting through polarizing noise with clarity and conviction</span>
-                    </li>
-                    <li className="flex gap-x-3">
-                      <span>• Building a community of ambitious, politically-engaged young thinkers</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Get Involved section */}
@@ -92,15 +48,15 @@ export default function About() {
           <div className="mx-auto max-w-2xl lg:mx-0">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Get Involved</h2>
             <p className="mt-6 text-lg leading-8 text-gray-600">
-              Are you a high schooler or college student ready to make your voice heard beyond classroom walls? Do you lead an organization of young political thinkers? PIVOT is actively seeking bold voices and strategic partners.
+              Are you a high schooler or college student ready to make your voice heard beyond classroom walls? Are you interested in joining a global network of youth to address the world&apos;s most pressing challenges? Do you lead an organization with similar values and goals?
             </p>
             <div className="mt-10">
-              <a
-                href="#"
-                className="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              <Link
+                href="/get-involved"
+                className="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500"
               >
-                Join PIVOT
-              </a>
+                Join us today <span aria-hidden="true">→</span>
+              </Link>
             </div>
           </div>
         </div>
