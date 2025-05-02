@@ -30,11 +30,17 @@ export default function FellowshipPage() {
           
           <div className="prose max-w-none mb-12">
             <p className="text-lg mb-6">
-              The Pivot Fellowship program brings together talented individuals passionate about
-              transforming healthcare through technology and innovation. Our fellows work on
-              cutting-edge projects while receiving mentorship from industry leaders.
+              The PIVOT Global Fellowship empowers young leaders to design original, solutions-focused policy proposals and equips them with the skills needed to share their ideas with real-world changemakers. Focusing on 5 main sectors: Environment, Education, Civil Rights, Public Health, and Economic Policy, our teams are addressing complex challenges with fresh perspectives and bold ideas.
             </p>
-            
+            <p className="text-lg mb-6">
+              We provide mentorship, training, and collaborative spaces for young policy innovators to:
+            </p>
+            <ul className="list-disc pl-6 mb-6">
+              <li>Conduct rigorous, data-driven research</li>
+              <li>Draft policy briefs and recommendations</li>
+              <li>Present their work to lawmakers, nonprofits, and advocacy groups</li>
+              <li>Publish thought leadership pieces on issues affecting youth worldwide</li>
+            </ul>
             <a
               href="https://forms.gle/ZzQkTMbwRCWb54BE9"
               target="_blank"
@@ -115,6 +121,11 @@ export default function FellowshipPage() {
                   </div>
                 )}
                 <h3 className="text-xl font-semibold mb-2">{fellow.name}</h3>
+                {(fellow.city || fellow.region) && (
+                  <p className="text-gray-600">
+                    {[fellow.city, fellow.region].filter(Boolean).join(", ")}
+                  </p>
+                )}
               </div>
             ))}
           </div>

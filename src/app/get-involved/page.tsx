@@ -8,7 +8,7 @@ export default function GetInvolved() {
           <div className="mx-auto max-w-2xl lg:mx-0">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Join</h2>
             <p className="mt-6 text-lg leading-8 text-gray-600">
-              Join PIVOT as a writer or fellow and help shape policy discussions.
+              Are you a high schooler or college student ready to make your voice heard beyond classroom walls? Are you interested in joining a global network of youth to address the world's most pressing challenges? Do you lead an organization with similar values and goals? PIVOT is always looking for new writers, fellows, and partners. Join now!
             </p>
           </div>
           

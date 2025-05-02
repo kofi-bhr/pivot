@@ -35,7 +35,7 @@ export default async function Home() {
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-bold font-montserrat mb-6 text-[#7ED0E7]">About Us</h2>
               <p className="text-lg leading-8 text-gray-600 mb-12">
-                PIVOT is a youth-led think tank, focusing on amplifying young voices in the policymaking process in two main ways. Through PIVOT Voices, youth are given a platform to publish op-eds, articles, and research papers on issues they feel passionately about. Through the PIVOT Fellowship, we empower young leaders to design original, solutions-focused policy briefs and equip them with the skills needed to share their ideas with real-world changemakers.
+                PIVOT is a high schooler-led think tank with 70+ staff/fellows that spans four continents, 11 countries, and 30+ US states, focusing on amplifying young voices in the policymaking process in two main ways. Through PIVOT Voices, youth are given a platform to publish op-eds, articles, and research papers on issues they feel passionately about. Through the PIVOT Fellowship, we empower young leaders to design original, solutions-focused policy briefs and equip them with the skills needed to share their ideas with real-world changemakers.
               </p>
             </div>
 
@@ -47,7 +47,7 @@ export default async function Home() {
                   </dt>
                   <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
                     <p className="flex-auto">
-                      A platform for youth to publish op-eds, articles, and research papers on issues they feel passionately about.
+                      A blog for students to publish op-eds, articles, and research papers on issues they feel passionately about.
                     </p>
                     <p className="mt-6">
                       <Link href="/articles" className="text-sm font-semibold font-montserrat leading-6 text-[#7ED0E7] hover:text-[#6BB8CC]">
