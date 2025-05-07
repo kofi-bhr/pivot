@@ -1,16 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Author } from '@/lib/supabase';
+import RichTextEditor from '@/components/admin/RichTextEditor';
+
+interface PageProps {
+  params: Promise<{ id: string }> & { id: string };
+}
 
 // In Next.js 15, params is a Promise, but we can still access it synchronously in client components
 // for backwards compatibility (this will be deprecated in future versions)
-export default function EditArticle({ params }: { params: { id: string } & Promise<{ id: string }> }) {
+export default function EditArticle({ params }: PageProps) {
   const router = useRouter();
-  const { id } = params;
   const [authors, setAuthors] = useState<Author[]>([]);
   const [formData, setFormData] = useState({
     title: '',
@@ -20,9 +24,11 @@ export default function EditArticle({ params }: { params: { id: string } & Promi
     author_id: '',
     is_visible: true,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { id } = use(params as Promise<{ id: string }>);
 
   useEffect(() => {
     async function fetchArticleAndAuthors() {
@@ -204,15 +210,13 @@ export default function EditArticle({ params }: { params: { id: string } & Promi
               <label htmlFor="content" className="block text-sm font-medium">
                 Content
               </label>
-              <textarea
-                name="content"
-                id="content"
-                rows={10}
-                required
-                value={formData.content}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              />
+              <div className="mt-1">
+                <RichTextEditor
+                  value={formData.content}
+                  onChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
+                  placeholder="Write your article content here..."
+                />
+              </div>
             </div>
 
             <div>

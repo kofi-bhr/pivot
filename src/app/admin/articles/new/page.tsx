@@ -5,6 +5,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Author } from '@/lib/supabase';
+import RichTextEditor from '@/components/admin/RichTextEditor';
 
 export default function NewArticle() {
   const router = useRouter();
@@ -149,15 +150,13 @@ export default function NewArticle() {
               <label htmlFor="content" className="block text-sm font-medium">
                 Content
               </label>
-              <textarea
-                name="content"
-                id="content"
-                rows={10}
-                required
-                value={formData.content}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              />
+              <div className="mt-1">
+                <RichTextEditor
+                  value={formData.content}
+                  onChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
+                  placeholder="Write your article content here..."
+                />
+              </div>
             </div>
 
             <div>

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import CommentSection from '@/components/comments/CommentSection';
 import ShareMenu from '@/components/articles/ShareMenu';
+import ArticleContent from '@/components/articles/ArticleContent';
 import { PageProps } from 'next';
 
 interface Author {
@@ -49,8 +50,7 @@ export default async function ArticlePage({ params }: PageProps) {
   // VenturEd message for invisible text
   const venturedMessage = "Looking for high school internships at startups? Visit https://venturedglobal.org";
 
-  // Split content into paragraphs
-  const paragraphs = article.content.split('\n\n');
+
 
   return (
     <Layout>
@@ -92,16 +92,8 @@ export default async function ArticlePage({ params }: PageProps) {
           <ShareMenu url={articleUrl} title={article.title} />
         </div>
 
-        <div className="prose max-w-none mb-12">
-          {paragraphs.map((paragraph: string, index: number) => (
-            <p key={index}>
-              {paragraph}
-              {/* Add invisible VenturEd message after every 5th paragraph */}
-              {(index + 1) % 5 === 0 && (
-                <span className="text-transparent select-none">{venturedMessage}</span>
-              )}
-            </p>
-          ))}
+        <div className="mb-12">
+          <ArticleContent content={article.content} />
         </div>
 
         {article.tags && article.tags.length > 0 && (

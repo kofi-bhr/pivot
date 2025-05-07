@@ -9,10 +9,13 @@ import type { Article, Author } from '@/lib/supabase';
 export default function ArticlesPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const ITEMS_PER_PAGE = 12;
 
-  useEffect(() => {
-    // Function to fetch articles
-    async function fetchArticles() {
+  // Function to fetch articles
+  async function fetchArticles(isLoadMore = false) {
+
       console.log('Fetching articles for articles page');
       setLoading(true);
       
@@ -28,7 +31,7 @@ export default function ArticlesPage() {
           .eq('is_visible', true)
           .not('published_at', 'is', null)
           .order('published_at', { ascending: false })
-          .limit(12);
+          .range((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE - 1);
 
         if (error) {
           console.error('Error fetching articles:', error);
@@ -37,7 +40,10 @@ export default function ArticlesPage() {
 
         if (!data || data.length === 0) {
           console.log('No articles found');
-          setArticles([]);
+          if (!isLoadMore) {
+            setArticles([]);
+          }
+          setHasMore(false);
           return;
         }
 
@@ -69,7 +75,8 @@ export default function ArticlesPage() {
           });
         }
         
-        setArticles(formattedArticles);
+        setArticles(prev => isLoadMore ? [...prev, ...formattedArticles] : formattedArticles);
+        setHasMore(formattedArticles.length === ITEMS_PER_PAGE);
       } catch (error) {
         console.error('Error in articles fetch:', error);
       } finally {
@@ -77,8 +84,8 @@ export default function ArticlesPage() {
       }
     }
 
-    // Initial fetch
-    fetchArticles();
+  useEffect(() => {
+    fetchArticles(false);
 
     // Set up real-time subscription
     const subscription = supabase
@@ -91,7 +98,8 @@ export default function ArticlesPage() {
         }, 
         () => {
           console.log('Articles table changed, refetching data');
-          fetchArticles();
+          setPage(1); // Reset pagination
+          fetchArticles(false);
         }
       )
       .subscribe();
@@ -139,10 +147,17 @@ export default function ArticlesPage() {
           </div>
         )}
 
-        {articles.length > 0 && (
+        {articles.length > 0 && hasMore && (
           <div className="mt-12 flex items-center justify-center">
-            <button className="rounded-md bg-blue-600 px-6 py-3 text-white hover:bg-blue-700">
-              Load More Articles
+            <button 
+              onClick={() => {
+                setPage(prev => prev + 1);
+                fetchArticles(true);
+              }}
+              disabled={loading}
+              className="rounded-md bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? 'Loading...' : 'Load More Articles'}
             </button>
           </div>
         )}

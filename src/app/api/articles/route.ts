@@ -1,10 +1,20 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import sanitizeHtml from 'sanitize-html';
 
 export async function POST(request: Request) {
   try {
     const data = await request.json();
     const { title, content, coverImage, tags, author_id } = data;
+
+    // Sanitize the HTML content
+    const sanitizedContent = sanitizeHtml(content, {
+      allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+      allowedAttributes: {
+        ...sanitizeHtml.defaults.allowedAttributes,
+        img: ['src', 'alt', 'title'],
+      },
+    });
 
     if (!title || !content || !author_id) {
       return NextResponse.json(
@@ -18,7 +28,7 @@ export async function POST(request: Request) {
       .from('articles')
       .insert({
         title,
-        content,
+        content: sanitizedContent,
         cover_image_url: coverImage,
         author_id,
         is_visible: data.is_visible || false,

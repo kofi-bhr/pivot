@@ -279,7 +279,7 @@ export default function AuthorPage() {
             ))
           ) : (
             <div className="col-span-3 text-center py-8">
-              <p className="text-gray-500">No articles found for this author.</p>
+              <p className="text-gray-500">No articles found for this author. NOOOO NOOO NOOOOO!!! NOOOO!!!! NO NO!!!</p>
             </div>
           )}
         </div>
