@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import ArticleCard from '@/components/articles/ArticleCard';
 import Layout from '@/components/layout/Layout';
@@ -11,11 +11,22 @@ export default function ArticlesPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const fetchingRef = useRef(false);
   const ITEMS_PER_PAGE = 12;
 
-  // Function to fetch articles
-  async function fetchArticles(isLoadMore = false) {
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const [target] = entries;
+    if (target.isIntersecting && hasMore && !loading && !fetchingRef.current) {
+      setPage(prev => prev + 1);
+      fetchArticles(true);
+    }
+  }, [hasMore, loading]);
 
+  // DO NOT CHANGE PLEEASE BRUH THIS FINALLY WORKS AHHH
+  async function fetchArticles(isLoadMore = false) {
+      if (fetchingRef.current) return;
+      fetchingRef.current = true;
       console.log('Fetching articles for articles page');
       setLoading(true);
       
@@ -75,14 +86,38 @@ export default function ArticlesPage() {
           });
         }
         
-        setArticles(prev => isLoadMore ? [...prev, ...formattedArticles] : formattedArticles);
+        setArticles(prev => {
+          if (isLoadMore) {
+            // Create a Set of existing article IDs for O(1) lookup
+            const existingIds = new Set(prev.map(article => article.id));
+            // Only add articles that don't already exist
+            const newArticles = formattedArticles.filter(article => !existingIds.has(article.id));
+            return [...prev, ...newArticles];
+          }
+          return formattedArticles;
+        });
         setHasMore(formattedArticles.length === ITEMS_PER_PAGE);
       } catch (error) {
         console.error('Error in articles fetch:', error);
       } finally {
         setLoading(false);
+        fetchingRef.current = false;
       }
     }
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: '20px',
+      threshold: 1.0
+    });
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [handleObserver]);
 
   useEffect(() => {
     fetchArticles(false);
@@ -148,17 +183,13 @@ export default function ArticlesPage() {
         )}
 
         {articles.length > 0 && hasMore && (
-          <div className="mt-12 flex items-center justify-center">
-            <button 
-              onClick={() => {
-                setPage(prev => prev + 1);
-                fetchArticles(true);
-              }}
-              disabled={loading}
-              className="rounded-md bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? 'Loading...' : 'Load More Articles'}
-            </button>
+          <div
+            ref={loadMoreRef}
+            className="mt-12 flex items-center justify-center p-4"
+          >
+            {loading && (
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            )}
           </div>
         )}
       </div>

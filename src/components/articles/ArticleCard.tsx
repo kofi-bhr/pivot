@@ -9,10 +9,12 @@ interface ArticleCardProps {
 }
 
 export default function ArticleCard({ article, featured = false }: ArticleCardProps) {
-  // Function to truncate text
+  // Function to truncate text and strip HTML tags
   const truncateText = (text: string | null | undefined, maxLength: number = 120): string => {
     if (!text) return '';
-    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    // Strip HTML tags
+    const strippedText = text.replace(/<[^>]*>/g, '');
+    return strippedText.length > maxLength ? strippedText.substring(0, maxLength) + '...' : strippedText;
   };
 
   // Format the date safely
