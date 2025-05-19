@@ -19,10 +19,11 @@ export default async function Home() {
     <Layout>
       <div>
         {/* Hero Section */}
-        <section className="bg-[#7ED0E7] py-24">
-          <div className="container mx-auto px-4">
+        <section className="relative py-64 bg-[url('/photos/bg-1.png')] bg-cover bg-center">
+          <div className="absolute inset-0 bg-black opacity-50"></div> {/* Overlay */}
+          <div className="container mx-auto px-4 relative z-10 text-white">
             <div className="text-center mb-16">
-              <h1 className="text-5xl font-bold font-montserrat mb-6 text-white">
+              <h1 style={{ color: 'white', fontSize: '3rem', fontWeight: 'bold' }} className="font-montserrat mb-6">
                 Welcome to PIVOT
               </h1>
             </div>
@@ -78,9 +79,12 @@ export default async function Home() {
         </section>
 
         {/* Programs Section */}
-        <section className="bg-white py-16">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold font-montserrat mb-8 text-center text-[#7ED0E7]">Our Programs</h2>
+        <section className="relative py-16 bg-[url('/photos/bg-2.png')] bg-cover bg-center">
+          <div className="absolute inset-0 bg-black opacity-25 z-0"></div> {/* Overlay */}
+          <div className="container mx-auto px-4 relative z-10">
+            <h2 className="text-3xl font-bold font-montserrat mb-12 text-center text-white">
+              Our Programs
+            </h2>
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               {/* PIVOT Voices */}
               <div className="bg-[#7ED0E7] rounded-lg p-8 shadow-md hover:shadow-lg transition-shadow">
@@ -114,9 +118,12 @@ export default async function Home() {
         </section>
 
         {/* Founders Section */}
-        <section className="bg-white py-16">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold font-montserrat mb-8 text-center text-[#7ED0E7]">Meet Our Founders</h2>
+        <section className="relative py-16 bg-[url('/photos/bg-2.png')] bg-cover bg-center">
+          <div className="absolute inset-0 bg-black opacity-25 z-0"></div> {/* Overlay */}
+          <div className="container mx-auto px-4 relative z-10">
+            <h2 className="text-3xl font-bold font-montserrat mb-8 text-center text-white">
+              Meet Our Founders
+            </h2>
             <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               {founders?.map((founder) => (
                 <div key={founder.id} className="text-center bg-white rounded-lg p-6 shadow-md">
