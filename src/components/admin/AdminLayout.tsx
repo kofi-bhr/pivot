@@ -26,7 +26,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { name: 'Dashboard', href: '/admin', icon: Home },
     { name: 'Staff', href: '/admin/staff', icon: Users },
     { name: 'Partners', href: '/admin/partners', icon: Handshake },
-    { name: 'Settings', href: '/admin/settings', icon: Settings },
+    { name: 'Homepage Settings', href: '/admin/homepage-stats', icon: Settings },
   ];
 
   const handleLogout = () => {

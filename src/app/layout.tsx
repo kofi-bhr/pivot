@@ -51,9 +51,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/PIVOT-LETTERMARK@3x.png" />
-        <link rel="apple-touch-icon" href="/PIVOT-LETTERMARK@3x.png" />
-        <link rel="manifest" href="/manifest.json" />
+        {/* Icons and manifest are handled by the metadata object */}
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body
