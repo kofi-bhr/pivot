@@ -13,6 +13,7 @@ interface NavLink {
 const leftNavigation: NavLink[] = [
   { name: 'Voices', href: '/articles' },
   { name: 'Partners', href: '/partners' },
+  { name: 'Policy Briefs', href: '/policy-briefs' },
   { name: 'Join', href: '/get-involved' },
 ];
 
