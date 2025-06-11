@@ -30,13 +30,14 @@ export default async function Home() {
     .from('authors')
     .select('*', { count: 'exact', head: true });
 
-  // Fetch homepage stats (countries, US states)
+  // Fetch homepage stats (countries, US states, and staff display count)
   const { data: homepageStatsData, error: homepageStatsError } = await supabase
     .from('homepage_stats')
     .select('stat_key, stat_value');
 
   let countriesCount = 11; // Default value
   let usStatesCount = 30;  // Default value
+  let staffDisplayCount = 0; // Default value for staff display
 
   if (!homepageStatsError && homepageStatsData) {
     const countriesStat = homepageStatsData.find(stat => stat.stat_key === 'countries_count');
@@ -46,6 +47,10 @@ export default async function Home() {
     const usStatesStat = homepageStatsData.find(stat => stat.stat_key === 'us_states_count');
     if (usStatesStat) {
       usStatesCount = usStatesStat.stat_value;
+    }
+    const staffDisplayStat = homepageStatsData.find(stat => stat.stat_key === 'staff_display_count'); // Fetch staff display count
+    if (staffDisplayStat) {
+      staffDisplayCount = staffDisplayStat.stat_value;
     }
   }
 
@@ -86,6 +91,10 @@ export default async function Home() {
                 <div>
                   <p className="text-5xl font-bold text-slate-700">{displayGlobalMembersCount}</p>
                   <p className="text-xl text-slate-600 mt-1">Global Members</p>
+                </div>
+                <div>
+                  <p className="text-5xl font-bold text-slate-700">{staffDisplayCount}</p> 
+                  <p className="text-xl text-slate-600 mt-1">Staff</p>
                 </div>
                 <div>
                   <p className="text-5xl font-bold text-slate-700">{countriesCount}</p>

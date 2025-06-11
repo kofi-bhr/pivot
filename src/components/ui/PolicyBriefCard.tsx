@@ -33,15 +33,20 @@ export default function PolicyBriefCard({ brief }: PolicyBriefCardProps) {
     // This effect helps trigger the animation once the component is mounted
     // and the image URL is present.
     if (brief.image_url) {
-      // Simulate image loading for animation trigger,
-      // real Image `onLoad` will also set it.
       const img = new (window as any).Image();
       img.src = brief.image_url;
       img.onload = () => {
         setImageLoaded(true);
       };
-      // Fallback if onload doesn't fire quickly (e.g. cached image)
-      setTimeout(() => setImageLoaded(true), 50);
+      // Check if image is already complete (e.g. cached)
+      if (img.complete) {
+        setImageLoaded(true);
+      } else {
+        // Fallback timeout if onload still doesn't fire for some reason
+        const timer = setTimeout(() => setImageLoaded(true), 200);
+        // Cleanup timer on component unmount or if brief.image_url changes
+        return () => clearTimeout(timer);
+      }
     } else {
       setImageLoaded(true); // No image to load, consider animation complete
     }
@@ -50,6 +55,13 @@ export default function PolicyBriefCard({ brief }: PolicyBriefCardProps) {
   // Placeholder for category if not provided by brief data
   const displayCategory = brief.category || "POLICY AREA";
   const displayAuthors = brief.authors?.join(', ') || "Staff Writer";
+
+  // Sanitize title for use as a filename (basic example)
+  const sanitizedTitle = brief.title?.replace(/[^a-zA-Z0-9_-]/g, '').replace(/\s+/g, '_');
+  // Attempt to get file extension from URL, default to .pdf if not found
+  const fileExtension = brief.file_url.split('.').pop() || 'pdf';
+  const downloadFilename = sanitizedTitle ? `${sanitizedTitle}.${fileExtension}` : `policy_brief.${fileExtension}`;
+
 
   return (
     <div className="flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden h-full">
@@ -60,8 +72,8 @@ export default function PolicyBriefCard({ brief }: PolicyBriefCardProps) {
             alt={brief.title || 'Policy Brief Image'}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className={`object-cover transition-transform duration-2000 ease-[cubic-bezier(0.25,1,0.5,1)] ${
-              imageLoaded ? 'scale-100' : 'scale-150' // Increased initial scale, longer duration
+            className={`object-cover transition-transform duration-[2500ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${
+              imageLoaded ? 'scale-100' : 'scale-175' // Updated scale, duration, and easing
             }`}
             onLoad={() => setImageLoaded(true)} // Ensure imageLoaded is true when image actually loads
             priority // If these cards are above the fold, consider adding priority
@@ -88,9 +100,10 @@ export default function PolicyBriefCard({ brief }: PolicyBriefCardProps) {
           href={brief.file_url}
           target="_blank"
           rel="noopener noreferrer"
+          download={downloadFilename} // Added download attribute with a generated filename
           className="block w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-4 rounded-lg text-center text-sm transition-colors duration-200"
         >
-          Read Brief &rarr;
+          Download Brief &rarr; {/* Updated text */}
         </Link>
       </div>
     </div>
