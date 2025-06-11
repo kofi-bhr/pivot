@@ -4,6 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Layout from '@/components/layout/Layout';
 
+export const revalidate = 0; // Force dynamic rendering and fresh data on every request
+
 export default async function Home() {
   const cookieStore = cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
@@ -62,7 +64,7 @@ export default async function Home() {
               <div className="flex flex-col md:flex-row justify-around items-center text-center space-y-8 md:space-y-0 md:space-x-8">
                 <div>
                   <p className="text-5xl font-bold text-slate-700">{staffDisplayCount}</p> 
-                  <p className="text-xl text-slate-600 mt-1">Staff</p>
+                  <p className="text-xl text-slate-600 mt-1">Members</p>
                 </div>
                 <div>
                   <p className="text-5xl font-bold text-slate-700">{countriesCount}</p>

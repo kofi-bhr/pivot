@@ -15,15 +15,16 @@ export default function AdminLoginPage() {
 
     const { data, error: queryError } = await supabase
       .from('admin_password')
-      .select('password')
+      .select('stat_value')
+      .eq('stat_key', 'password')
       .single();
 
     if (queryError || !data) {
-      setError('Failed to verify password');
+      setError('Failed to verify password. Check database configuration.');
       return;
     }
 
-    if (data.password === password) {
+    if (data.stat_value === password) {
       // Set cookie and redirect
       document.cookie = 'admin_token=true; path=/';
       router.push('/admin');
