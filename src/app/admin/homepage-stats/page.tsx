@@ -52,41 +52,46 @@ export default async function AdminHomepageStatsPage() {
     //     return;
     // }
 
-    const newCountriesCount = formData.get('countriesCount');
-    const newUsStatesCount = formData.get('usStatesCount');
-    const newStaffDisplayCount = formData.get('staffDisplayCount'); // Added newStaffDisplayCount
+    const countriesCountStr = formData.get('countriesCount') as string;
+    const usStatesCountStr = formData.get('usStatesCount') as string;
+    const staffDisplayCountStr = formData.get('staffDisplayCount') as string;
 
-    if (newCountriesCount !== null) {
-      const { error: countriesError } = await supabase
-        .from('homepage_stats')
-        .update({ stat_value: Number(newCountriesCount) })
-        .eq('stat_key', 'countries_count');
-      if (countriesError) {
-        console.error('Error updating countries count:', countriesError);
-      }
+    const statsToUpsert = [];
+
+    if (countriesCountStr && !isNaN(parseInt(countriesCountStr, 10))) {
+      statsToUpsert.push({
+        stat_key: 'countries_count',
+        stat_value: parseInt(countriesCountStr, 10),
+      });
     }
 
-    if (newUsStatesCount !== null) {
-      const { error: usStatesError } = await supabase
-        .from('homepage_stats')
-        .update({ stat_value: Number(newUsStatesCount) })
-        .eq('stat_key', 'us_states_count');
-      if (usStatesError) {
-        console.error('Error updating US states count:', usStatesError);
-      }
+    if (usStatesCountStr && !isNaN(parseInt(usStatesCountStr, 10))) {
+      statsToUpsert.push({
+        stat_key: 'us_states_count',
+        stat_value: parseInt(usStatesCountStr, 10),
+      });
     }
 
-    if (newStaffDisplayCount !== null) { // Added block for staffDisplayCount
-      const { error: staffError } = await supabase
+    if (staffDisplayCountStr && !isNaN(parseInt(staffDisplayCountStr, 10))) {
+      statsToUpsert.push({
+        stat_key: 'staff_display_count',
+        stat_value: parseInt(staffDisplayCountStr, 10),
+      });
+    }
+
+    if (statsToUpsert.length > 0) {
+      const { error } = await supabase
         .from('homepage_stats')
-        .update({ stat_value: Number(newStaffDisplayCount) })
-        .eq('stat_key', 'staff_display_count');
-      // If the stat doesn't exist, you might want to insert it.
-      // This example assumes 'staff_display_count' row already exists.
-      // Consider adding an upsert or insert logic if it might not.
-      if (staffError) {
-        console.error('Error updating staff display count:', staffError);
+        .upsert(statsToUpsert, { onConflict: 'stat_key' });
+
+      if (error) {
+        console.error('Error upserting homepage stats:', error);
+        // Optionally, you could return an error message to the UI
+      } else {
+        console.log('Homepage stats updated successfully.');
       }
+    } else {
+      console.log('No valid stats to update.');
     }
 
     revalidatePath('/'); // Revalidate the home page
