@@ -15,24 +15,9 @@ export default async function Home() {
     .ilike('title', '%Founder%')
     .order('display_order');
 
-  // Fetch fellows count
-  const { count: fellowsCount, error: fellowsError } = await supabase
-    .from('fellows')
-    .select('*', { count: 'exact', head: true });
-
-  // Fetch staff count
-  const { count: staffCount, error: staffError } = await supabase
-    .from('staff')
-    .select('*', { count: 'exact', head: true });
-
-  // Fetch authors count
-  const { count: authorsCount, error: authorsError } = await supabase
-    .from('authors')
-    .select('*', { count: 'exact', head: true });
-
   // Fetch homepage stats (countries, US states, and staff display count)
   const { data: homepageStatsData, error: homepageStatsError } = await supabase
-    .from('homepage_stats')
+    .from('admin_password')
     .select('stat_key, stat_value');
 
   let countriesCount = 11; // Default value
@@ -54,19 +39,6 @@ export default async function Home() {
     }
   }
 
-  let displayGlobalMembersCount = "0+";
-  const counts = [
-    { count: fellowsCount, error: fellowsError },
-    { count: staffCount, error: staffError },
-    { count: authorsCount, error: authorsError },
-  ];
-
-  const validCounts = counts.filter(c => c.count !== null && !c.error).map(c => c.count || 0);
-
-  if (validCounts.length > 0) {
-    const totalMembers = validCounts.reduce((sum, current) => sum + current, 0);
-    displayGlobalMembersCount = `${Math.floor(totalMembers / 10) * 10}+`;
-  }
 
   return (
     <Layout>
@@ -89,10 +61,6 @@ export default async function Home() {
             <div className="container mx-auto px-4">
               <div className="flex flex-col md:flex-row justify-around items-center text-center space-y-8 md:space-y-0 md:space-x-8">
                 <div>
-                  <p className="text-5xl font-bold text-slate-700">{displayGlobalMembersCount}</p>
-                  <p className="text-xl text-slate-600 mt-1">Global Members</p>
-                </div>
-                <div>
                   <p className="text-5xl font-bold text-slate-700">{staffDisplayCount}</p> 
                   <p className="text-xl text-slate-600 mt-1">Staff</p>
                 </div>
@@ -110,7 +78,7 @@ export default async function Home() {
           <div className="py-16 text-center">
             <div className="container mx-auto px-4">
               <h3 className="text-3xl font-bold font-montserrat mb-6 text-slate-800">
-                {displayGlobalMembersCount} members, {countriesCount} countries, 1 mission
+                {countriesCount} Countries, {usStatesCount} US States, 1 Mission
               </h3>
               <p className="text-lg leading-relaxed text-slate-700 max-w-3xl mx-auto">
                 Youth are directly impacted by policy but rarely have a seat at the table. PIVOT was created to address this disconnect by equipping young leaders with the tools to analyze, draft, and advocate for policy based on their lived experiences. We create nonpartisan solutions to our world's most pressing problems in a time of extreme polarization.

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react'; // For animation
 
 // Define the structure of a policy brief object, matching your Supabase table
-import { Author } from '../../lib/supabase';
+import { Author } from '@/lib/supabase';
 
 // Define the structure of a brief object, matching your Supabase table
 export interface Brief {
