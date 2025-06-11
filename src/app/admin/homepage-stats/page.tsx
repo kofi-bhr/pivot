@@ -62,6 +62,7 @@ export default async function AdminHomepageStatsPage() {
       statsToUpsert.push({
         stat_key: 'countries_count',
         stat_value: parseInt(countriesCountStr, 10),
+        updated_at: new Date().toISOString(),
       });
     }
 
@@ -69,6 +70,7 @@ export default async function AdminHomepageStatsPage() {
       statsToUpsert.push({
         stat_key: 'us_states_count',
         stat_value: parseInt(usStatesCountStr, 10),
+        updated_at: new Date().toISOString(),
       });
     }
 
@@ -76,6 +78,7 @@ export default async function AdminHomepageStatsPage() {
       statsToUpsert.push({
         stat_key: 'staff_display_count',
         stat_value: parseInt(staffDisplayCountStr, 10),
+        updated_at: new Date().toISOString(),
       });
     }
 
