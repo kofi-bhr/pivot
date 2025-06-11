@@ -1,32 +1,31 @@
 "use client";
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react'; // For animation
+import React, { useEffect, useState } from 'react'; // For animation
 
 // Define the structure of a policy brief object, matching your Supabase table
-export interface PolicyBrief {
+import { Author } from '../../lib/supabase';
+
+// Define the structure of a brief object, matching your Supabase table
+export interface Brief {
   id: string;
   created_at: string;
   updated_at: string;
   title: string;
-  description?: string | null;
+  summary?: string | null;
   image_url?: string | null;
   file_url: string;
-  authors?: string[] | null; // Assuming this is an array of author names
-  published_date?: string | null;
+  author: Author | null;
+  department?: string | null;
+  published?: boolean;
   display_order?: number | null;
-  // Add a field for the category like "CRIMINAL JUSTICE", "PUBLIC HEALTH POLICY"
-  // This should ideally come from your Supabase table.
-  // For now, I'll add a placeholder. You'll need to add this to your Supabase table
-  // and fetch it.
-  category?: string | null;
 }
 
-interface PolicyBriefCardProps {
-  brief: PolicyBrief;
+interface BriefCardProps {
+  brief: Brief;
 }
 
-export default function PolicyBriefCard({ brief }: PolicyBriefCardProps) {
+export default function BriefCard({ brief }: BriefCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
@@ -53,8 +52,8 @@ export default function PolicyBriefCard({ brief }: PolicyBriefCardProps) {
   }, [brief.image_url]);
 
   // Placeholder for category if not provided by brief data
-  const displayCategory = brief.category || "POLICY AREA";
-  const displayAuthors = brief.authors?.join(', ') || "Staff Writer";
+  const displayCategory = brief.department || "POLICY AREA";
+  const displayAuthor = brief.author ? `${brief.author.first_name} ${brief.author.last_name}` : "Staff Writer";
 
   // Sanitize title for use as a filename (basic example)
   const sanitizedTitle = brief.title?.replace(/[^a-zA-Z0-9_-]/g, '').replace(/\s+/g, '_');
@@ -69,7 +68,7 @@ export default function PolicyBriefCard({ brief }: PolicyBriefCardProps) {
         <div className="relative w-full aspect-[16/9] overflow-hidden"> {/* Common aspect ratio for images */}
           <Image
             src={brief.image_url}
-            alt={brief.title || 'Policy Brief Image'}
+            alt={brief.title || 'Brief Image'}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className={`object-cover transition-transform duration-[2500ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${
@@ -85,15 +84,15 @@ export default function PolicyBriefCard({ brief }: PolicyBriefCardProps) {
           {brief.title}
         </h3>
         <p className="text-xs uppercase text-gray-700 font-semibold mb-2 tracking-wider">
-          IN {displayCategory} <span className="text-slate-500">BY</span> {displayAuthors}
+          IN {displayCategory} <span className="text-slate-500">BY</span> {displayAuthor}
         </p>
-        {brief.description && (
+        {brief.summary && (
           <p className="text-slate-600 text-sm mb-4 line-clamp-3 flex-grow"> {/* line-clamp limits description lines */}
-            {brief.description}
+            {brief.summary}
           </p>
         )}
         {/* Spacer to push button to bottom if description is short */}
-        {!brief.description && <div className="flex-grow"></div>}
+        {!brief.summary && <div className="flex-grow"></div>}
       </div>
       <div className="p-5 pt-0 mt-auto"> {/* mt-auto pushes this to the bottom */}
         <Link

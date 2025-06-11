@@ -196,6 +196,17 @@ export default async function Home() {
           </section>
         </div>
 
+        {/* View Briefs Section */}
+        <section className="bg-white py-16">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold font-montserrat mb-4 text-slate-800">Explore Our Policy Briefs</h2>
+            <p className="text-lg text-slate-600 mb-8">In-depth analysis and recommendations on today's pressing issues.</p>
+            <Link href="/briefs" className="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors">
+              View Briefs
+            </Link>
+          </div>
+        </section>
+
         {/* Departments Preview */}
         <section className="bg-[#E1FFFE] py-16">
           <div className="container mx-auto px-4">

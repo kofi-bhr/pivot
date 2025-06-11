@@ -70,6 +70,20 @@ export type Article = {
   tags?: string[];
 };
 
+export type Brief = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  title: string;
+  summary?: string | null;
+  file_url: string;
+  department?: string | null;
+  author_id: string;
+  published?: boolean;
+  display_order?: number | null;
+  author?: Author;
+};
+
 export type Comment = {
   id: string;
   content: string;

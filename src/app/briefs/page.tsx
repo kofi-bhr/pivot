@@ -1,20 +1,20 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import Layout from '@/components/layout/Layout';
-import PolicyBriefCard, { PolicyBrief } from '@/components/ui/PolicyBriefCard'; // Import the new card and its type
+import BriefCard, { Brief } from '@/components/ui/BriefCard'; // Import the new card and its type
 
 export const revalidate = 0; // Or a specific time in seconds, e.g., 3600 for 1 hour
 
-export default async function PolicyBriefsPage() {
+export default async function BriefsPage() {
   const cookieStore = cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
 
-  // Fetch policy briefs, ordered by display_order, then by published_date descending
+  // Fetch briefs, ordered by display_order, then by created_at descending
   const { data: briefs, error } = await supabase
-    .from('policy_briefs')
-    .select('*')
-    .order('display_order', { ascending: true, nullsFirst: false }) // Optional: if you use display_order
-    .order('published_date', { ascending: false });
+    .from('briefs')
+    .select('*, author:authors(*)')
+    .order('display_order', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching policy briefs:', error);
@@ -25,23 +25,23 @@ export default async function PolicyBriefsPage() {
     <Layout>
       <div className="container mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold font-montserrat mb-10 text-center text-slate-800">
-          Policy Briefs
+          Briefs
         </h1>
         {error && (
           <div className="text-center text-red-600 mb-8">
-            <p>Could not fetch policy briefs at this time. Please try again later.</p>
+            <p>Could not fetch briefs at this time. Please try again later.</p>
           </div>
         )}
         {briefs && briefs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {briefs.map((brief) => (
-              <PolicyBriefCard key={brief.id} brief={brief as PolicyBrief} />
+              <BriefCard key={brief.id} brief={brief as unknown as Brief} />
             ))}
           </div>
         ) : (
           !error && (
             <div className="text-center text-slate-600">
-              <p>No policy briefs available at the moment. Please check back soon!</p>
+              <p>No briefs available at the moment. Please check back soon!</p>
             </div>
           )
         )}
