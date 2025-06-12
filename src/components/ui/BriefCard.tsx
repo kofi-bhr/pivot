@@ -65,13 +65,13 @@ export default function BriefCard({ brief }: BriefCardProps) {
   return (
     <div className="flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden h-full">
       {brief.image_url && (
-        <div className="relative w-full aspect-[16/9] overflow-hidden"> {/* Common aspect ratio for images */}
+        <div className="relative w-full aspect-[16/9] overflow-hidden rounded-xl"> {/* Common aspect ratio for images */}
           <Image
             src={brief.image_url}
             alt={brief.title || 'Brief Image'}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className={`object-cover transition-transform duration-[2500ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${
+            className={`object-cover transition-transform duration-[3000ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${
               imageLoaded ? 'scale-100' : 'scale-175' // Updated scale, duration, and easing
             }`}
             onLoad={() => setImageLoaded(true)} // Ensure imageLoaded is true when image actually loads

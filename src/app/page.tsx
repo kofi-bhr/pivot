@@ -40,13 +40,35 @@ export default async function Home() {
   const displayStats = fetchedStats || [];
 
   // For the specific sentence: "{countriesCount} Countries, {usStatesCount} US States, 1 Mission"
-  // We'll try to find these specific stats. This part might need adjustment
-  // if these exact stat_keys are not guaranteed to be present.
-  const countriesStat = displayStats.find(s => s.stat_key === 'countries_served'); // Assuming 'countries_served' from sample SQL
-  const usStatesStat = displayStats.find(s => s.stat_key === 'us_states_count'); // Assuming 'us_states_count' from old code
+  // Attempt to find the stats with more flexibility.
+  let countriesStat = displayStats.find(s => s.stat_key === 'countries_served');
+  if (!countriesStat) {
+    countriesStat = displayStats.find(s => s.stat_key === 'countries');
+  }
+
+  let usStatesStat = displayStats.find(s => s.stat_key === 'us_states_count');
+  if (!usStatesStat) {
+    usStatesStat = displayStats.find(s => s.stat_key === 'us_states');
+  }
+  if (!usStatesStat) {
+    usStatesStat = displayStats.find(s => s.stat_key === 'states');
+  }
 
   const countriesCountValue = countriesStat?.stat_value || '0';
   const usStatesCountValue = usStatesStat?.stat_value || '0';
+
+  if (countriesCountValue === '0' && displayStats.length > 0) {
+    console.warn(
+      "Cascade Debug: 'countriesCountValue' is '0'. Could not find 'countries_served' or 'countries'. Available stats:",
+      displayStats.map(s => ({ key: s.stat_key, label: s.stat_label, value: s.stat_value }))
+    );
+  }
+  if (usStatesCountValue === '0' && displayStats.length > 0) {
+    console.warn(
+      "Cascade Debug: 'usStatesCountValue' is '0'. Could not find 'us_states_count', 'us_states', or 'states'. Available stats:",
+      displayStats.map(s => ({ key: s.stat_key, label: s.stat_label, value: s.stat_value }))
+    );
+  }
 
   return (
     <Layout>
@@ -78,15 +100,15 @@ export default async function Home() {
                 {displayStats.length === 0 && (
                   <>
                     <div>
-                      <p className="text-5xl font-bold text-slate-700">0</p> 
+                      <p className="text-5xl font-bold text-slate-700">100+</p> 
                       <p className="text-xl text-slate-600 mt-1">Members</p>
                     </div>
                     <div>
-                      <p className="text-5xl font-bold text-slate-700">0</p>
+                      <p className="text-5xl font-bold text-slate-700">31</p>
                       <p className="text-xl text-slate-600 mt-1">Countries</p>
                     </div>
                     <div>
-                      <p className="text-5xl font-bold text-slate-700">0</p>
+                      <p className="text-5xl font-bold text-slate-700">20+</p>
                       <p className="text-xl text-slate-600 mt-1">US States</p>
                     </div>
                   </>
