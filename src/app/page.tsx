@@ -6,6 +6,14 @@ import Layout from '@/components/layout/Layout';
 
 export const revalidate = 0; // Force dynamic rendering and fresh data on every request
 
+interface HomepageStat {
+  id: string; // Assuming id is part of the selection if needed for keys, though stat_key is also unique
+  stat_key: string;
+  stat_label: string;
+  stat_value: string | null;
+  display_order: number;
+}
+
 export default async function Home() {
   const cookieStore = cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
@@ -17,30 +25,28 @@ export default async function Home() {
     .ilike('title', '%Founder%')
     .order('display_order');
 
-  // Fetch homepage stats (countries, US states, and staff display count)
-  const { data: homepageStatsData, error: homepageStatsError } = await supabase
-    .from('admin_password')
-    .select('stat_key, stat_value');
+  // Fetch homepage stats from the new 'homepage_stats' table
+  const { data: fetchedStats, error: homepageStatsError } = await supabase
+    .from('homepage_stats')
+    .select('id, stat_key, stat_label, stat_value, display_order')
+    .order('display_order', { ascending: true });
 
-  let countriesCount = 11; // Default value
-  let usStatesCount = 30;  // Default value
-  let staffDisplayCount = 0; // Default value for staff display
-
-  if (!homepageStatsError && homepageStatsData) {
-    const countriesStat = homepageStatsData.find(stat => stat.stat_key === 'countries_count');
-    if (countriesStat) {
-      countriesCount = countriesStat.stat_value;
-    }
-    const usStatesStat = homepageStatsData.find(stat => stat.stat_key === 'us_states_count');
-    if (usStatesStat) {
-      usStatesCount = usStatesStat.stat_value;
-    }
-    const staffDisplayStat = homepageStatsData.find(stat => stat.stat_key === 'staff_display_count'); // Fetch staff display count
-    if (staffDisplayStat) {
-      staffDisplayCount = staffDisplayStat.stat_value;
-    }
+  if (homepageStatsError) {
+    console.error("Error fetching homepage stats:", homepageStatsError);
+    // Handle error appropriately, maybe show default stats or an error message
   }
 
+  // Prepare stats for display, providing fallbacks if needed
+  const displayStats = fetchedStats || [];
+
+  // For the specific sentence: "{countriesCount} Countries, {usStatesCount} US States, 1 Mission"
+  // We'll try to find these specific stats. This part might need adjustment
+  // if these exact stat_keys are not guaranteed to be present.
+  const countriesStat = displayStats.find(s => s.stat_key === 'countries_served'); // Assuming 'countries_served' from sample SQL
+  const usStatesStat = displayStats.find(s => s.stat_key === 'us_states_count'); // Assuming 'us_states_count' from old code
+
+  const countriesCountValue = countriesStat?.stat_value || '0';
+  const usStatesCountValue = usStatesStat?.stat_value || '0';
 
   return (
     <Layout>
@@ -62,25 +68,37 @@ export default async function Home() {
           <div className="bg-slate-50 py-12">
             <div className="container mx-auto px-4">
               <div className="flex flex-col md:flex-row justify-around items-center text-center space-y-8 md:space-y-0 md:space-x-8">
-                <div>
-                  <p className="text-5xl font-bold text-slate-700">{staffDisplayCount}</p> 
-                  <p className="text-xl text-slate-600 mt-1">Members</p>
-                </div>
-                <div>
-                  <p className="text-5xl font-bold text-slate-700">{countriesCount}</p>
-                  <p className="text-xl text-slate-600 mt-1">Countries</p>
-                </div>
-                <div>
-                  <p className="text-5xl font-bold text-slate-700">{usStatesCount}</p>
-                  <p className="text-xl text-slate-600 mt-1">US States</p>
-                </div>
+                {displayStats.map((stat) => (
+                  <div key={stat.stat_key}> {/* Use stat_key as it's unique */}
+                    <p className="text-5xl font-bold text-slate-700">{stat.stat_value || 'N/A'}</p> 
+                    <p className="text-xl text-slate-600 mt-1">{stat.stat_label}</p>
+                  </div>
+                ))}
+                {/* Fallback if no stats are loaded, or keep a default structure if desired */}
+                {displayStats.length === 0 && (
+                  <>
+                    <div>
+                      <p className="text-5xl font-bold text-slate-700">0</p> 
+                      <p className="text-xl text-slate-600 mt-1">Members</p>
+                    </div>
+                    <div>
+                      <p className="text-5xl font-bold text-slate-700">0</p>
+                      <p className="text-xl text-slate-600 mt-1">Countries</p>
+                    </div>
+                    <div>
+                      <p className="text-5xl font-bold text-slate-700">0</p>
+                      <p className="text-xl text-slate-600 mt-1">US States</p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
           <div className="py-16 text-center">
             <div className="container mx-auto px-4">
               <h3 className="text-3xl font-bold font-montserrat mb-6 text-slate-800">
-                {countriesCount} Countries, {usStatesCount} US States, 1 Mission
+                {/* This sentence might need to be more dynamic or removed if stat_keys change */}
+                {countriesCountValue} Countries, {usStatesCountValue} US States, 1 Mission
               </h3>
               <p className="text-lg leading-relaxed text-slate-700 max-w-3xl mx-auto">
                 Youth are directly impacted by policy but rarely have a seat at the table. PIVOT was created to address this disconnect by equipping young leaders with the tools to analyze, draft, and advocate for policy based on their lived experiences. We create nonpartisan solutions to our world's most pressing problems in a time of extreme polarization.
