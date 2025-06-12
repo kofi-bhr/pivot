@@ -26,18 +26,30 @@ export default async function Home() {
     .order('display_order');
 
   // Fetch homepage stats from the new 'homepage_stats' table
-  const { data: fetchedStats, error: homepageStatsError } = await supabase
-    .from('homepage_stats')
-    .select('id, stat_key, stat_label, stat_value, display_order')
-    .order('display_order', { ascending: true });
-
-  if (homepageStatsError) {
-    console.error("Error fetching homepage stats:", homepageStatsError);
-    // Handle error appropriately, maybe show default stats or an error message
+  let fetchedStats: HomepageStat[] = [];
+  try {
+    const { data, error } = await supabase
+      .from('homepage_stats')
+      .select('id, stat_key, stat_label, stat_value, display_order')
+      .order('display_order', { ascending: true });
+    
+    if (error) {
+      console.error("Error fetching homepage stats:", error.message || JSON.stringify(error));
+      // We'll use fallback stats below
+    } else {
+      fetchedStats = data || [];
+    }
+  } catch (err) {
+    console.error("Exception when fetching homepage stats:", err);
+    // We'll use fallback stats below
   }
 
   // Prepare stats for display, providing fallbacks if needed
-  const displayStats = fetchedStats || [];
+  const displayStats: HomepageStat[] = fetchedStats.length > 0 ? fetchedStats : [
+    { id: 'fallback-1', stat_key: 'members', stat_label: 'Members', stat_value: '100+', display_order: 1 },
+    { id: 'fallback-2', stat_key: 'countries', stat_label: 'Countries', stat_value: '31', display_order: 2 },
+    { id: 'fallback-3', stat_key: 'states', stat_label: 'US States', stat_value: '20+', display_order: 3 }
+  ];
 
   // For the specific sentence: "{countriesCount} Countries, {usStatesCount} US States, 1 Mission"
   // Attempt to find the stats by their labels, as these are user-facing.
