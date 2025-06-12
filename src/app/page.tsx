@@ -40,18 +40,20 @@ export default async function Home() {
   const displayStats = fetchedStats || [];
 
   // For the specific sentence: "{countriesCount} Countries, {usStatesCount} US States, 1 Mission"
-  // Attempt to find the stats with more flexibility.
-  let countriesStat = displayStats.find(s => s.stat_key === 'countries_served');
-  if (!countriesStat) {
-    countriesStat = displayStats.find(s => s.stat_key === 'countries');
-  }
+  // Attempt to find the stats by their labels, as these are user-facing.
+  let countriesStat = displayStats.find(s => s.stat_label?.toLowerCase().includes('countries'));
 
-  let usStatesStat = displayStats.find(s => s.stat_key === 'us_states_count');
+  // Prioritize "us states" then more general "states" that seem to refer to the US
+  let usStatesStat = displayStats.find(s => s.stat_label?.toLowerCase() === 'us states');
   if (!usStatesStat) {
-    usStatesStat = displayStats.find(s => s.stat_key === 'us_states');
+    usStatesStat = displayStats.find(s =>
+      s.stat_label?.toLowerCase().includes('states') &&
+      (s.stat_label?.toLowerCase().includes('us') || s.stat_label?.toLowerCase().includes('u.s.'))
+    );
   }
   if (!usStatesStat) {
-    usStatesStat = displayStats.find(s => s.stat_key === 'states');
+    // Fallback for a simple "States" label, assuming it means US states in this context
+    usStatesStat = displayStats.find(s => s.stat_label?.toLowerCase() === 'states');
   }
 
   const countriesCountValue = countriesStat?.stat_value || '0';
@@ -59,13 +61,13 @@ export default async function Home() {
 
   if (countriesCountValue === '0' && displayStats.length > 0) {
     console.warn(
-      "Cascade Debug: 'countriesCountValue' is '0'. Could not find 'countries_served' or 'countries'. Available stats:",
+      "Cascade Debug: 'countriesCountValue' is '0'. Could not find a stat with 'Countries' in its label. Available stats:",
       displayStats.map(s => ({ key: s.stat_key, label: s.stat_label, value: s.stat_value }))
     );
   }
   if (usStatesCountValue === '0' && displayStats.length > 0) {
     console.warn(
-      "Cascade Debug: 'usStatesCountValue' is '0'. Could not find 'us_states_count', 'us_states', or 'states'. Available stats:",
+      "Cascade Debug: 'usStatesCountValue' is '0'. Could not find a stat with a label like 'US States' or 'States'. Available stats:",
       displayStats.map(s => ({ key: s.stat_key, label: s.stat_label, value: s.stat_value }))
     );
   }
