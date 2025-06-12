@@ -50,18 +50,33 @@ export default async function AdminHomepageStatsPage() {
     //     return; // Or throw an error
     // }
 
-    const statsToUpsert: Array<{ stat_key: string; stat_value: string }> = [];
+    // Use a temporary object to collect values and labels for each stat_key
+    const statsDataMap: { [key: string]: { stat_value?: string; stat_label?: string } } = {};
 
-    for (const [key, value] of formData.entries()) {
-      if (key.startsWith('stat_value_')) {
-        const statKey = key.substring('stat_value_'.length);
-        if (statKey) { // Ensure statKey is not empty
-          statsToUpsert.push({
-            stat_key: statKey,
-            stat_value: value as string,
-            // updated_at is handled by the database trigger
-          });
+    for (const [formKey, formValue] of formData.entries()) {
+      if (formKey.startsWith('stat_value_')) {
+        const statKey = formKey.substring('stat_value_'.length);
+        if (statKey) {
+          if (!statsDataMap[statKey]) statsDataMap[statKey] = {};
+          statsDataMap[statKey].stat_value = formValue as string;
         }
+      } else if (formKey.startsWith('stat_label_')) {
+        const statKey = formKey.substring('stat_label_'.length);
+        if (statKey) {
+          if (!statsDataMap[statKey]) statsDataMap[statKey] = {};
+          statsDataMap[statKey].stat_label = formValue as string;
+        }
+      }
+    }
+
+    const statsToUpsert: Array<{ stat_key: string; stat_value?: string; stat_label?: string }> = [];
+    for (const statKey in statsDataMap) {
+      if (Object.prototype.hasOwnProperty.call(statsDataMap, statKey)) {
+        statsToUpsert.push({
+          stat_key: statKey,
+          ...statsDataMap[statKey],
+          // updated_at is handled by the database trigger
+        });
       }
     }
 
@@ -97,18 +112,38 @@ export default async function AdminHomepageStatsPage() {
         ) : (
           <form action={updateHomepageStats} className="space-y-6 bg-white p-6 rounded-lg shadow max-w-lg">
             {stats.map((stat) => (
-              <div key={stat.id}> {/* Use stat.id for React key */}
-                <label htmlFor={`stat_value_${stat.stat_key}`} className="block text-sm font-medium text-gray-700 mb-1">
-                  {stat.stat_label}
-                </label>
-                <input
-                  type="text" // Using text type for flexibility as stat_value is TEXT in DB
-                  name={`stat_value_${stat.stat_key}`} // Name includes stat_key for server action parsing
-                  id={`stat_value_${stat.stat_key}`}
-                  defaultValue={stat.stat_value || ''} // Default to empty string if null
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder={`Enter value for ${stat.stat_label}`}
-                />
+              <div key={stat.id} className="p-4 border border-gray-200 rounded-md">
+                {/* Input for Stat Label */}
+                <div>
+                  <label htmlFor={`stat_label_${stat.stat_key}`} className="block text-sm font-medium text-gray-700 mb-1">
+                    Display Label (for <code className="text-xs bg-gray-100 p-0.5 rounded">{stat.stat_key}</code>)
+                  </label>
+                  <input
+                    type="text"
+                    name={`stat_label_${stat.stat_key}`}
+                    id={`stat_label_${stat.stat_key}`}
+                    defaultValue={stat.stat_label}
+                    required
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm mb-3"
+                    placeholder={`Enter display label for ${stat.stat_key}`}
+                  />
+                </div>
+
+                {/* Input for Stat Value */}
+                <div>
+                  <label htmlFor={`stat_value_${stat.stat_key}`} className="block text-sm font-medium text-gray-700 mb-1">
+                    Value (for <code className="text-xs bg-gray-100 p-0.5 rounded">{stat.stat_key}</code>)
+                  </label>
+                  <input
+                    type="text" // Using text type for flexibility as stat_value is TEXT in DB
+                    name={`stat_value_${stat.stat_key}`} // Name includes stat_key for server action parsing
+                    id={`stat_value_${stat.stat_key}`}
+                    defaultValue={stat.stat_value || ''} // Default to empty string if null
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    placeholder={`Enter value for ${stat.stat_label}`}
+                  />
+                </div>
+                
                 {/* Example of a helper text, if needed based on stat_key or label */}
                 {/* {stat.stat_key === 'some_specific_key' && (
                   <p className="mt-2 text-xs text-gray-500">Specific instruction for this stat.</p>
