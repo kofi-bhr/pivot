@@ -1,24 +1,53 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import Layout from '@/components/layout/Layout';
 import BriefCard, { Brief } from '@/components/ui/BriefCard'; // Import the new card and its type
+import { createClient } from '@/utils/supabase/server';
 
 export const revalidate = 0; // Or a specific time in seconds, e.g., 3600 for 1 hour
 
 export default async function BriefsPage() {
   const cookieStore = cookies();
-  const supabase = createServerComponentClient({ cookies: () => cookieStore });
+  const supabase = createClient(cookieStore);
 
   // Fetch briefs, ordered by display_order, then by created_at descending
-  const { data: briefs, error } = await supabase
-    .from('briefs')
-    .select('*, author:authors(*)')
-    .order('display_order', { ascending: true, nullsFirst: false })
-    .order('created_at', { ascending: false });
+  let briefs: any[] = [];
+  let fetchError = false;
+  
+  try {
+    console.log('Attempting to fetch briefs...');
+    
+    // Check if Supabase client is properly initialized
+    if (!supabase) {
+      console.error('Error: Supabase client is not initialized');
+      fetchError = true;
+      return;
+    }
+    
+    const { data, error } = await supabase
+      .from('briefs')
+      .select('*, author:authors(*)')
+      .order('display_order', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching policy briefs:', error);
-    // Optionally, render an error message to the user
+    if (error) {
+      console.error('Error fetching policy briefs:', error.message || JSON.stringify(error));
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      fetchError = true;
+    } else {
+      console.log(`Successfully fetched ${data?.length || 0} briefs`);
+      briefs = data || [];
+    }
+  } catch (err) {
+    console.error('Exception when fetching policy briefs:', err);
+    // Try to get more details about the error
+    if (err instanceof Error) {
+      console.error('Error name:', err.name);
+      console.error('Error message:', err.message);
+      console.error('Error stack:', err.stack);
+    } else {
+      console.error('Unknown error type:', typeof err);
+    }
+    fetchError = true;
   }
 
   return (
@@ -27,7 +56,7 @@ export default async function BriefsPage() {
         <h1 className="text-4xl font-bold font-montserrat mb-10 text-center text-slate-800">
           Briefs
         </h1>
-        {error && (
+        {fetchError && (
           <div className="text-center text-red-600 mb-8">
             <p>Could not fetch briefs at this time. Please try again later.</p>
           </div>
@@ -39,7 +68,7 @@ export default async function BriefsPage() {
             ))}
           </div>
         ) : (
-          !error && (
+          !fetchError && (
             <div className="text-center text-slate-600">
               <p>No briefs available at the moment. Please check back soon!</p>
             </div>

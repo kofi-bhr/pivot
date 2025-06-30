@@ -88,7 +88,7 @@ export default async function Home() {
     <Layout>
       <div>
         {/* Hero Section */}
-        <section className="relative py-64 bg-[url('/photos/bg-1.png')] bg-cover bg-center">
+        <section className="relative py-48 bg-[url('/photos/bg-1.png')] bg-cover bg-center">
           <div className="absolute inset-0 bg-black opacity-50"></div> {/* Overlay */}
           <div className="container mx-auto px-4 relative z-10 text-white">
             <div className="text-center mb-16">

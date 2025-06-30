@@ -11,16 +11,14 @@ interface NavLink {
 }
 
 const leftNavigation: NavLink[] = [
-  { name: 'Voices', href: '/articles' },
-  { name: 'Partners', href: '/partners' },
-
+  { name: 'Articles', href: '/articles' },
+  { name: 'Policy', href: '/briefs' },
   { name: 'Join', href: '/get-involved' },
 ];
 
 const rightNavigation: NavLink[] = [
-  { name: 'Authors', href: '/authors' },
+  { name: 'People', href: '/people' },
   { name: 'Staff', href: '/staff' },
-  { name: 'Fellows', href: '/fellowship' },
 ];
 
 export default function Header() {
@@ -49,8 +47,22 @@ export default function Header() {
         
         {/* Desktop navigation */}
         <div className="hidden md:flex items-center justify-between py-6">
+          {/* Logo on the left */}
+          <Link href="/" className="flex-shrink-0">
+            <div className="cfr-logo">
+              <Image 
+                src="/PIVOT-LOGO.svg" 
+                alt="PIVOT Logo" 
+                width={100} 
+                height={40} 
+                priority
+              />
+            </div>
+          </Link>
+          
+          {/* Combined navigation on the right */}
           <nav className="flex items-center space-x-8">
-            {leftNavigation.map((link) => (
+            {[...leftNavigation, ...rightNavigation].map((link) => (
               link.external ? (
                 <a
                   key={link.name}
@@ -72,32 +84,6 @@ export default function Header() {
                   {link.name}
                 </Link>
               )
-            ))}
-          </nav>
-          
-          <Link href="/" className="flex flex-col items-center mx-12">
-            <div className="cfr-logo">
-              <Image 
-                src="/PIVOT-LOGO.svg" 
-                alt="PIVOT Logo" 
-                width={100} 
-                height={40} 
-                priority
-              />
-            </div>
-          </Link>
-          
-          <nav className="flex items-center space-x-8">
-            {rightNavigation.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={`cfr-nav-link ${
-                  pathname === link.href ? 'active' : ''
-                }`}
-              >
-                {link.name}
-              </Link>
             ))}
           </nav>
         </div>
